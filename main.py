@@ -1,8 +1,11 @@
 import cv2
 
+from config import Config
+
 from audio import AudioThread
 from hand_tracker import HandTracker
 from display import Display
+
 
 def get_cam(idx) -> cv2.VideoCapture:
     cap = cv2.VideoCapture(idx)
@@ -14,11 +17,13 @@ def get_cam(idx) -> cv2.VideoCapture:
 
 
 def main():
-    cap = get_cam(0)
-    hand_tracker = HandTracker(n_hands=1)
-    display = Display(hand_tracker)
+    config = Config()
+    print(type(config.audio.note_frequencies))
+    cap = get_cam(config.display.cam_id)
+    hand_tracker = HandTracker(config)
+    display = Display(hand_tracker, config)
 
-    audio_thread = AudioThread()
+    audio_thread = AudioThread(config)
     audio_thread.start()
 
     try:

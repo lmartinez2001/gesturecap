@@ -5,15 +5,21 @@ import matplotlib.pyplot as plt
 import mediapipe as mp
 from mediapipe.python.solutions.drawing_utils import DrawingSpec
 
-from audio import note_frequencies
-
 
 class Display:
-    def __init__(self, hand_tracker):
+    def __init__(self, hand_tracker, config):
+        self.config = config
+        self.notes: dict = config.audio.note_frequencies
+
         self.mp_drawing = mp.solutions.drawing_utils
         self.mp_drawing_styles = mp.solutions.drawing_styles
-        self.landmarks_style = DrawingSpec(color=(49, 209, 255))
-        self.connections_style = DrawingSpec(color=(255, 0, 0), thickness=1)
+        self.landmarks_style = DrawingSpec(
+            color=config.display.landmarks_color
+        )
+        self.connections_style = DrawingSpec(
+            color=config.display.connections_color,
+            thickness=config.display.connections_thickness
+        )
         self.mp_hands = mp.solutions.hands
 
         self.tracker = hand_tracker
@@ -21,9 +27,9 @@ class Display:
 
     def draw_note_lines(self, frame: np.ndarray) -> np.ndarray:
         h, w, _ = frame.shape
-        for note, freq in note_frequencies.items():
-            x = int((freq - 261.63) / (523.25 - 261.63) * w)
-            frame = cv2.line(frame, (x, 0), (x, h), (0, 255, 0), 1)
+        for note, freq in self.notes.items():
+            x = int((freq - self.notes['C4']) / (self.notes['C5'] - self.notes['C4']) * w)
+            frame = cv2.line(frame, (x, 0), (x, h), self.config.display.note_lines_color, 1)
             frame = cv2.putText(frame, note, (x + 5, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         return frame
 
@@ -42,11 +48,17 @@ class Display:
 
             row, col, _ = frame.shape
             cx, cy = int(self.tracker.smoothed_barycenter[0] * col), int(self.tracker.smoothed_barycenter[1] * row)
-            frame = cv2.circle(frame, (cx, cy), 10, (0, 0, 255), -1)
+            frame = cv2.circle(
+                frame,
+                (cx, cy),
+                self.config.display.barycenter_radius,
+                self.config.display.barycenter_color,
+                -1
+            )
         return frame
 
 
-    def update(self, frame: np.ndarray):
+    def update(self, frame: np.ndarray) -> None:
         if self.tracker.hand_landmarks:
             frame = self.draw_hand_landmarks(frame)
         frame = self.draw_note_lines(frame)

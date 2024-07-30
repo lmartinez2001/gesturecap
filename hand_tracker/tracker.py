@@ -4,10 +4,15 @@ import mediapipe as mp
 from mediapipe.python.solutions.drawing_utils import DrawingSpec
 
 class HandTracker:
-    def __init__(self, n_hands: int, min_detection_confidence: float=0.5):
+    def __init__(self, config):
+        self.config = config
+
         # Initialize mediapipe backend
         self.mp_hands = mp.solutions.hands
-        self.hands = self.mp_hands.Hands(max_num_hands=n_hands, min_detection_confidence=min_detection_confidence)
+        self.hands = self.mp_hands.Hands(
+            max_num_hands=config.tracker.n_hands,
+            min_detection_confidence=config.tracker.detection_confidence
+        )
 
         # Keep track of the true barycenter and the smoothed (previous) one for exponential smoothing
         self.current_barycenter = None
@@ -27,7 +32,10 @@ class HandTracker:
         if self.hand_landmarks:
             # For now only handles one hand
             self.current_barycenter = self.compute_barycenter(self.hand_landmarks[0])
-            self.smoothed_barycenter = self.smooth_barycenter(self.smoothed_barycenter, self.current_barycenter)
+            self.smoothed_barycenter = self.smooth_barycenter(
+                previous=self.smoothed_barycenter,
+                current=self.current_barycenter,
+                alpha=self.config.tracker.alpha_barycenter)
         else:
             self.current_barycenter = None
             self.smoothed_barycenter = None
