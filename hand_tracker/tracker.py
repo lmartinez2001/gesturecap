@@ -6,6 +6,7 @@ from mediapipe.python.solutions.drawing_utils import DrawingSpec
 class HandTracker:
     def __init__(self, config):
         self.config = config
+        self.lms: dict = config.tracker.landmarks_name
 
         # Initialize mediapipe backend
         self.mp_hands = mp.solutions.hands
@@ -62,8 +63,14 @@ class HandTracker:
         return smoothed_barycenter
 
 
+    def dist_between_lms(self, lm1_idx: int, lm2_idx: int) -> float:
+        lm1, lm2 = self.hand_landmarks[0][lm1_idx], self.hand_landmarks[0][lm2_idx]
+        return np.linalg.norm(np.array(lm1)[:-1] - np.array(lm2)[:-1])
+
+
     def update_audio_params(self, audio_thread) -> None:
         if self.smoothed_barycenter is not None:
+            print(self.dist_between_lms(self.lms['INDEX_FINGER_TIP'], self.lms['THUMB_TIP']))
             normalized_height = 1 - self.smoothed_barycenter[1]
             normalized_width = self.smoothed_barycenter[0]
 
