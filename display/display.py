@@ -28,7 +28,7 @@ class Display:
     def draw_note_lines(self, frame: np.ndarray) -> np.ndarray:
         h, w, _ = frame.shape
         for note, freq in self.notes.items():
-            x = int((freq - self.notes['C4']) / (self.notes['C5'] - self.notes['C4']) * w)
+            x = int((freq - self.config.audio.min_freq) / (self.config.audio.max_freq - self.config.audio.min_freq) * w)
             frame = cv2.line(frame, (x, 0), (x, h), self.config.display.note_lines_color, 1)
             frame = cv2.putText(frame, note, (x + 5, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         return frame

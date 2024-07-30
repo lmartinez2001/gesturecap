@@ -17,6 +17,9 @@ class AudioConfig:
    # Frequency smoothing factor
    alpha_freq: float = 0.15
 
+   min_freq:float = 200.0
+   max_freq:float = 600.0
+
    note_frequencies: Dict[str, float] = field(default_factory= lambda: ({
                             'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
                             'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25

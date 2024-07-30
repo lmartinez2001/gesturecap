@@ -7,6 +7,7 @@ class HandTracker:
     def __init__(self, config):
         self.config = config
         self.lms_name: dict = config.tracker.landmarks_name
+        # self.notes: dict = config.audio.note_frequencies
 
         # Initialize mediapipe backend
         self.mp_hands = mp.solutions.hands
@@ -14,7 +15,7 @@ class HandTracker:
             max_num_hands=config.tracker.n_hands,
             min_detection_confidence=config.tracker.detection_confidence
         )
-
+        #
         # Keep track of the true barycenter and the smoothed (previous) one for exponential smoothing
         self.current_barycenter = None
         self.smoothed_barycenter = None
@@ -89,7 +90,7 @@ class HandTracker:
             normalized_width = self.smoothed_barycenter[0]
 
             # Map pitch to normalized width (C4 to C5)
-            audio_thread.target_freq = 261.63 + normalized_width * (523.25 - 261.63)
+            audio_thread.target_freq = self.config.audio.min_freq + normalized_width * (self.config.audio.max_freq - self.config.audio.min_freq)
 
             # Map volume to normalized height (0-1)
             audio_thread.target_volume = normalized_height
