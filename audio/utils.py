@@ -38,11 +38,12 @@ class AudioThread(threading.Thread):
                 samples, self.phase = self.generate_sine_wave(self.current_freq, self.buffer_size, self.phase)
                 output_samples = samples * self.current_volume
             else:
-                samples, self.phase = self.generate_sine_wave(self.current_freq, self.buffer_size, self.phase)
-                output_samples = samples * self.current_volume * max(0, 1 - self.phase / (0.1 * self.fs))
-                if self.phase > 0.1 * self.fs:
-                    output_samples = np.zeros(self.buffer_size)
-                    self.phase = 0
+                # samples, self.phase = self.generate_sine_wave(self.current_freq, self.buffer_size, self.phase)
+                # output_samples = samples * self.current_volume * max(0, 1 - self.phase / (0.1 * self.fs))
+                # if self.phase > 0.1 * self.fs:
+                #     output_samples = np.zeros(self.buffer_size)
+                #     self.phase = 0
+                output_samples = np.zeros(self.buffer_size)
             self.stream.write(output_samples.astype(np.float32).tobytes())
 
     def generate_sine_wave(self, freq, num_samples, start_phase):
