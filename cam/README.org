@@ -1,5 +1,6 @@
 #+title: Blackfly camera environment setup
 #+author: Louis Martinez
+#+options:   toc:2
 #+date: <2024-07-31 Wed>
 
 
