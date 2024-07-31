@@ -115,4 +115,4 @@ class HandTracker:
             # Map volume to normalized height (0-1)
             audio_thread.target_volume = normalized_height
         else:
-            audio_thread.is_sound_on = self.config.audio.default_volume
+            audio_thread.target_volume = self.config.audio.default_volume
