@@ -1,3 +1,3 @@
-from .hand_strategy_factory import HandStrategyFactory
+from .hand_strategies import RightHandStrategy, LeftHandStrategy
 
-__all__ = ['HandStrategyFactory']
+__all__ = ['RightHandStrategy', 'LeftHandStrategy']
