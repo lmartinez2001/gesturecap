@@ -1,0 +1,39 @@
+#+title: Blackfly camera environment setup
+#+author: Louis Martinez
+
+* Blackfly camera environment setup
+
+** Camera
+
+*** Hardware list
++ BlackFly S BFS-U3-04S2C camera
++ Ricoh FL-CC0614A-2M lens
++ FLIR tripod adapter for BFS series cameras (30 mm)
++ FLIR cable, USB 3.1 Type-A to micro-B (Locking), 5m length
++ FLIR GPIO cable with 6-pin Hirose HR10 connector, 6-pin, 4.5m length
++ K&F Concept tripod
+
+*** Camera setup
+1. Screw the tripod adapter to the bottom of the camera
+2. Detach the removable tray from the tripod
+3. Screw the camera to the tray
+4. Reattach the tray to the tripod
+5. Unscrew the camera lens cover
+6. Remove the lens inlet cover
+7. Screw the lens to the camera
+8. Connect the USB cable to back of camera and to a PC
+
+
+** Spinnaker SDK
+
+*** Downloading the SDK
+
+1. Go to the [[https://www.flir.eu/products/spinnaker-sdk/?vertical=machine+vision&segment=iis][download page]] of the SpinnakerSDK
+2. Click the *Download* button. You'll be asked to provide an email address. If the later is already linked with a Flir account you then just have to type your password
+3. Once you are logged in, specicify your country and state/territory before clicking on *Download Now*
+4. Select the version of the SDK you want to download according to your OS and hardware architecture
+5. Follow the installation instructions
+
+*** PySpin setup
+
+** Camera parameters
