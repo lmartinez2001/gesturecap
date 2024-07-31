@@ -1,3 +1,5 @@
+import logging
+
 import cv2
 
 from config import Config
@@ -7,24 +9,29 @@ from hand_tracker import HandTracker
 from display import Display
 
 
+logger = logging.getLogger(__name__)
+
 def get_cam(idx) -> cv2.VideoCapture:
     cap = cv2.VideoCapture(idx)
+    logger.info(f'Camera loaded with index {idx}')
 
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     if not cap.isOpened():
-        raise RuntimeError("Failed to open webcam")
+        raise RuntimeError('Failed to open webcam')
     return cap
 
 
 def main():
+    logging.basicConfig(filename='gsoc.log', level=logging.INFO)
+    logging.info('Starting hand tracker')
     config = Config()
-    print(type(config.audio.note_frequencies))
     cap = get_cam(config.display.cam_id)
     hand_tracker = HandTracker(config)
     display = Display(hand_tracker, config)
 
     audio_thread = AudioThread(config)
     audio_thread.start()
+    logger.info('Audio thread started')
 
     try:
         while cap.isOpened():

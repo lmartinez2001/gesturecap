@@ -1,6 +1,10 @@
+import logging
+
 import numpy as np
 import pyaudio
 import threading
+
+logger = logging.getLogger(__name__)
 
 class AudioThread(threading.Thread):
     def __init__(self, config):
@@ -16,6 +20,7 @@ class AudioThread(threading.Thread):
         self.target_volume = self.current_volume
         self.phase = 0
         self.running = True
+        logger.info('AudioThread class initialized')
 
     def run(self):
         alpha_freq = self.config.audio.alpha_freq

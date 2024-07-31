@@ -1,11 +1,16 @@
-import cv2
-import numpy as np
-import mediapipe as mp
-from google.protobuf.json_format import MessageToDict
-from mediapipe.python.solutions.drawing_utils import DrawingSpec
-from .strategy import RightHandStrategy, LeftHandStrategy
+import logging
 from typing import Dict, Any
 
+import cv2
+import numpy as np
+
+import mediapipe as mp
+from mediapipe.python.solutions.drawing_utils import DrawingSpec
+from google.protobuf.json_format import MessageToDict
+
+from .strategy import RightHandStrategy, LeftHandStrategy
+
+logger = logging.getLogger(__name__)
 
 class HandTracker:
     def __init__(self, config):
@@ -16,7 +21,6 @@ class HandTracker:
         }
        
         self.lms_name: Dict[str, int] = config.tracker.landmarks_name
-        # self.notes: dict = config.audio.note_frequencies
 
         # Initialize mediapipe backend
         self.mp_hands = mp.solutions.hands
@@ -24,10 +28,9 @@ class HandTracker:
             max_num_hands=config.tracker.n_hands,
             min_detection_confidence=config.tracker.detection_confidence
         )
-        #
         # Keep track of the true barycenter and the smoothed (previous) one for exponential smoothing
         self._reset_tracking_parameters()
-        print('Hand tracker initialized')
+        logger.info('HandTracker class initialized')
 
 
     def _landmarks_to_list(self, landmarks) -> list:

@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict
+import logging
 
 @dataclass
 class AudioConfig:
@@ -27,32 +28,32 @@ class AudioConfig:
 
 @dataclass
 class DisplayConfig:
-    landmarks_color: tuple = (49, 209, 255)
+   landmarks_color: tuple = (49, 209, 255)
 
-    connections_color: tuple = (255, 0, 0)
+   connections_color: tuple = (255, 0, 0)
 
-    connections_thickness: int = 1
+   connections_thickness: int = 1
 
-    barycenter_color: tuple = (0, 0, 255)
+   barycenter_color: tuple = (0, 0, 255)
 
-    barycenter_radius: int = 10
+   barycenter_radius: int = 10
 
-    note_lines_color: tuple = (0, 255, 0)
+   note_lines_color: tuple = (0, 255, 0)
 
-    cam_id: int = 0
+   cam_id: int = 0
 
 
 @dataclass
 class TrackerConfig:
-    # Barycenter smoothing factor
-    alpha_barycenter: float = 0.3
+   # Barycenter smoothing factor
+   alpha_barycenter: float = 0.3
 
-    # Number of hands to be tracked
-    n_hands: int = 2
+   # Number of hands to be tracked
+   n_hands: int = 2
 
-    detection_confidence: float = 0.6
+   detection_confidence: float = 0.6
 
-    landmarks_name: Dict[str, int] = field(default_factory= lambda: ({
+   landmarks_name: Dict[str, int] = field(default_factory= lambda: ({
          'WRIST': 0,
          'THUMB_CMC': 1,
          'THUMB_MCP': 2,
@@ -74,10 +75,15 @@ class TrackerConfig:
          'PINKY_PIP': 18,
          'PINKY_DIP': 19,
          'PINKY_TIP': 20
-    }))
+   }))
 
 @dataclass
 class Config:
-    audio: AudioConfig = field(default_factory=AudioConfig)
-    display: DisplayConfig = field(default_factory=DisplayConfig)
-    tracker: TrackerConfig = field(default_factory=TrackerConfig)
+   audio: AudioConfig = field(default_factory=AudioConfig)
+   display: DisplayConfig = field(default_factory=DisplayConfig)
+   tracker: TrackerConfig = field(default_factory=TrackerConfig)
+
+   logger: logging.Logger = field(default_factory=lambda: logging.getLogger(__name__), init=False)
+
+   def __post_init__(self):
+      self.logger.info('Config loaded')

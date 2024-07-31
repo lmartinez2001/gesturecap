@@ -1,6 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import Dict, Any
+import logging
 
+from typing import Dict, Any
+from abc import ABC, abstractmethod
+
+
+logger = logging.getLogger(__name__)
 
 class HandStrategy(ABC):
     @abstractmethod
@@ -11,6 +15,7 @@ class RightHandStrategy(HandStrategy):
     def __init__(self, config):
         self.config = config
         self.lms_name = config.tracker.landmarks_name
+        logger.info('RightHandStrategy class initialized')
 
     def process(self, landmarks: Dict[str, Any], audio_thread: Any) -> None:
         if landmarks['list']:
@@ -32,6 +37,7 @@ class RightHandStrategy(HandStrategy):
 class LeftHandStrategy(HandStrategy):
     def __init__(self, config):
         self.config = config
+        logger.info('LeftHandStrategy class initialized')
 
     def process(self, landmarks: Dict[str, Any], audio_thread: Any) -> None:
         if landmarks['list']:

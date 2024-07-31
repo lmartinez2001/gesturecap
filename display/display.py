@@ -1,3 +1,5 @@
+import logging
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,6 +7,8 @@ import matplotlib.pyplot as plt
 import mediapipe as mp
 from mediapipe.python.solutions.drawing_utils import DrawingSpec
 
+
+logger = logging.getLogger(__name__)
 
 class Display:
     def __init__(self, hand_tracker, config):
@@ -23,9 +27,10 @@ class Display:
         self.mp_hands = mp.solutions.hands
 
         self.tracker = hand_tracker
+        logger.info('Display class initialized')
 
 
-    def draw_note_lines(self, frame: np.ndarray) -> np.ndarray:
+    def _draw_note_lines(self, frame: np.ndarray) -> np.ndarray:
         h, w, _ = frame.shape
         for note, freq in self.notes.items():
             x = int((freq - self.config.audio.min_freq) / (self.config.audio.max_freq - self.config.audio.min_freq) * w)
@@ -34,7 +39,7 @@ class Display:
         return frame
 
 
-    def draw_hand_landmarks(self, frame: np.ndarray) -> np.ndarray:
+    def _draw_hand_landmarks(self, frame: np.ndarray) -> np.ndarray:
         row, col, _ = frame.shape
         if self.tracker.hand_landmarks['Right']:
             self.mp_drawing.draw_landmarks(
@@ -75,6 +80,6 @@ class Display:
 
 
     def update(self, frame: np.ndarray) -> None:
-        frame = self.draw_hand_landmarks(frame)
-        frame = self.draw_note_lines(frame)
+        frame = self._draw_hand_landmarks(frame)
+        frame = self._draw_note_lines(frame)
         cv2.imshow('Output', frame)
