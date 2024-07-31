@@ -9,7 +9,7 @@ class AudioConfig:
 
    default_freq: int = 440
 
-   default_volume: float = 0.3
+   default_volume: float = 0.5
 
    # Volume smoothing factor
    alpha_vol: float = 0.15
@@ -48,7 +48,7 @@ class TrackerConfig:
     alpha_barycenter: float = 0.3
 
     # Number of hands to be tracked
-    n_hands: int = 1
+    n_hands: int = 2
 
     detection_confidence: float = 0.6
 

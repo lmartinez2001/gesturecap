@@ -35,19 +35,35 @@ class Display:
 
 
     def draw_hand_landmarks(self, frame: np.ndarray) -> np.ndarray:
-        assert self.tracker.hand_landmarks is not None and self.tracker.smoothed_barycenter is not None
-
-        for landmarks in self.tracker.hand_landmarks:
+        row, col, _ = frame.shape
+        if self.tracker.hand_landmarks['Right']:
             self.mp_drawing.draw_landmarks(
                 image=frame,
-                landmark_list=landmarks,
+                landmark_list=self.tracker.hand_landmarks['Right'],
                 connections=self.mp_hands.HAND_CONNECTIONS,
                 landmark_drawing_spec=self.landmarks_style,
                 connection_drawing_spec=self.connections_style)
 
 
-            row, col, _ = frame.shape
-            cx, cy = int(self.tracker.smoothed_barycenter[0] * col), int(self.tracker.smoothed_barycenter[1] * row)
+            cx, cy = int(self.tracker.smoothed_barycenter['Right'][0] * col), int(self.tracker.smoothed_barycenter['Right'][1] * row)
+            frame = cv2.circle(
+                frame,
+                (cx, cy),
+                self.config.display.barycenter_radius,
+                self.config.display.barycenter_color,
+                -1
+            )
+
+        if self.tracker.hand_landmarks['Left']:
+            self.mp_drawing.draw_landmarks(
+                image=frame,
+                landmark_list=self.tracker.hand_landmarks['Left'],
+                connections=self.mp_hands.HAND_CONNECTIONS,
+                landmark_drawing_spec=self.landmarks_style,
+                connection_drawing_spec=self.connections_style)
+
+
+            cx, cy = int(self.tracker.smoothed_barycenter['Left'][0] * col), int(self.tracker.smoothed_barycenter['Left'][1] * row)
             frame = cv2.circle(
                 frame,
                 (cx, cy),
@@ -59,7 +75,6 @@ class Display:
 
 
     def update(self, frame: np.ndarray) -> None:
-        if self.tracker.hand_landmarks:
-            frame = self.draw_hand_landmarks(frame)
+        frame = self.draw_hand_landmarks(frame)
         frame = self.draw_note_lines(frame)
         cv2.imshow('Output', frame)
