@@ -5,3 +5,4 @@ pyrightconfig.json
 **/__pycache__/
 **/Spinnaker-Examples
 **/*.log
+experiments/
