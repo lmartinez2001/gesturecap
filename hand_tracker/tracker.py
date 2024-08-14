@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 
 import mediapipe as mp
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 from mediapipe.python.solutions.drawing_utils import DrawingSpec
 from google.protobuf.json_format import MessageToDict
 
@@ -13,24 +15,38 @@ from .strategy import RightHandStrategy, LeftHandStrategy
 logger = logging.getLogger(__name__)
 
 class HandTracker:
-    def __init__(self, config):
+    def __init__(self, config, device: str = 'cpu'):
         self.config = config
         self.hand_strategies = {
             'Right': RightHandStrategy(config),
             'Left': LeftHandStrategy(config)
         }
-       
+        self.device = device
         self.lms_name: Dict[str, int] = config.tracker.landmarks_name
 
         # Initialize mediapipe backend
         self.mp_hands = mp.solutions.hands
-        self.hands = self.mp_hands.Hands(
-            max_num_hands=config.tracker.n_hands,
-            min_detection_confidence=config.tracker.detection_confidence
-        )
+        self.hands = self._create_hand_landmarker()
+
         # Keep track of the true barycenter and the smoothed (previous) one for exponential smoothing
         self._reset_tracking_parameters()
         logger.info('HandTracker class initialized')
+
+
+    def _create_hand_landmarker(self, device: str):
+        base_options = python.BaseOptions(
+            model_asset_path='hand_landmarker.task',  # You'll need to download this model
+            # delegate=python.BaseOptions.Delegate.CPU,
+            delegate=python.BaseOptions.Delegate.GPU if self.device == 'gpu' else python.BaseOptions.Delegate.CPU
+        )
+        options = vision.HandLandmarkerOptions(
+            base_options=base_options,
+            num_hands=self.config.tracker.n_hands,
+            min_hand_detection_confidence=self.config.tracker.detection_confidence,
+            min_hand_presence_confidence=0.5,
+            min_tracking_confidence=0.5,
+        )
+        return vision.HandLandmarker.create_from_options(options)
 
 
     def _landmarks_to_list(self, landmarks) -> list:
@@ -56,6 +72,7 @@ class HandTracker:
     def process_frame(self, frame: np.ndarray) -> None:
         assert frame is not None
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame_rgb)
         results = self.hands.process(frame_rgb)
 
         self._reset_tracking_parameters()

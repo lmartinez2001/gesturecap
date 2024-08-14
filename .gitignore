@@ -6,3 +6,6 @@ pyrightconfig.json
 **/Spinnaker-Examples
 **/*.log
 experiments/
+timing/
+cam/cam_gpu.py
+hand_tracker/hand_pose_detector_gpu.py
