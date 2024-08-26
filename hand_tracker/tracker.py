@@ -26,7 +26,7 @@ class HandTracker:
 
         # Initialize mediapipe backend
         self.mp_hands = mp.solutions.hands
-        self.hands = self._create_hand_landmarker()
+        self.hands = self._create_hand_landmarker(device)
 
         # Keep track of the true barycenter and the smoothed (previous) one for exponential smoothing
         self._reset_tracking_parameters()

@@ -20,6 +20,13 @@ def get_cam(idx) -> cv2.VideoCapture:
         raise RuntimeError('Failed to open webcam')
     return cap
 
+# from video import webcam, flircam
+
+# cam = webcam/filrcam(bunch of options)
+# hand_tracker = HandTracker(device='cpu')
+# while...
+#   frame = cam.read()
+
 
 def main():
     logging.basicConfig(filename='gsoc.log', level=logging.INFO)
