@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 import threading 
-import numpy as np
 import logging
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,6 @@ class VideoInput(ABC):
         self.configure()
         self.frame = None
         self.is_running = False
-        self.frame_lock = threading.Lock()
         self.frame_available = threading.Event()
 
 
@@ -36,17 +36,17 @@ class VideoInput(ABC):
         self.thread.start()
 
 
+    def _capture_loop(self):
+        while self.is_running:
+            self.frame = self.read_frame()
+            self.frame_available.set()
+
+
     def stop(self):
         logger.info('Stopping video stream')
         self.is_running = False
         self.thread.join()
         self.cleanup()
-
-
-    def _capture_loop(self):
-        while self.is_running:
-            self.frame = new_frame
-            self.frame_available.set()
 
 
     def get_frame(self):
