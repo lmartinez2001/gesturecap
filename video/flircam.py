@@ -3,7 +3,7 @@ import PySpin
 import time
 import logging
 
-from video_input import VideoInput
+from .video_input import VideoInput
 
 logger = logging.getLogger(__name__)
 

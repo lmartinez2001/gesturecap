@@ -14,7 +14,7 @@ from .strategy import RightHandStrategy, LeftHandStrategy
 
 logger = logging.getLogger(__name__)
 
-class HandTracker:
+class HandLandmarker:
     def __init__(self, config, device: str = 'cpu'):
         self.config = config
         self.hand_strategies = {

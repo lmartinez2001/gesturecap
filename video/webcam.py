@@ -1,5 +1,5 @@
 import cv2
-from video_input import VideoInput
+from .video_input import VideoInput
 import time
 
 

@@ -4,21 +4,24 @@ import cv2
 
 from config import Config
 
-from audio import AudioThread
-from hand_tracker import HandTracker
-from display import Display
+# AI models
+from models.hand_pose import HandLandmarker
 
+# Video module
+from video import Webcam
+
+# Hand strategy module
 
 logger = logging.getLogger(__name__)
 
-def get_cam(idx) -> cv2.VideoCapture:
-    cap = cv2.VideoCapture(idx)
-    logger.info(f'Camera loaded with index {idx}')
+# def get_cam(idx) -> cv2.VideoCapture:
+#     cap = cv2.VideoCapture(idx)
+#     logger.info(f'Camera loaded with index {idx}')
 
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-    if not cap.isOpened():
-        raise RuntimeError('Failed to open webcam')
-    return cap
+#     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+#     if not cap.isOpened():
+#         raise RuntimeError('Failed to open webcam')
+#     return cap
 
 # from video import webcam, flircam
 
@@ -29,39 +32,41 @@ def get_cam(idx) -> cv2.VideoCapture:
 
 
 def main():
-    logging.basicConfig(filename='gsoc.log', level=logging.INFO)
-    logging.info('Starting hand tracker')
-    config = Config()
-    cap = get_cam(config.display.cam_id)
-    hand_tracker = HandTracker(config)
-    display = Display(hand_tracker, config)
+    logging.basicConfig(level=logging.INFO)
 
-    audio_thread = AudioThread(config)
-    audio_thread.start()
-    logger.info('Audio thread started')
+    config = Config()
+
+    cam = Webcam(0)
+
+    hand_landmarker = HandLandmarker(config)
+
+    # display = Display(hand_tracker, config)
+
+    # audio_thread = AudioThread(config)
+    # audio_thread.start()
+    # logger.info('Audio thread started')
+
+    cam.start()
 
     try:
-        while cap.isOpened():
-            valid, frame = cap.read()
-            if not valid:
-                continue
-
-            # Vertical flip (more intuitive)
-            frame = cv2.flip(frame, 1)
-            hand_tracker.process_frame(frame)
-            display.update(frame)
-            hand_tracker.update_audio_params(audio_thread)
-            # cv2.imshow("Output", frame)
+        while cam.is_running:
+            frame = cam.get_frame()
+            landmarks = hand_landmarker.detect_hand_pose(frame)
+            print(len(landmarks))
 
             key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
+            if key == ord("q"):
                 break
+    except KeyboardInterrupt:
+        pass
 
     finally:
-        audio_thread.stop()
-        audio_thread.join()
-        cap.release()
-        cv2.destroyAllWindows()
+        cam.stop()
+        # audio_thread.stop()
+        # audio_thread.join()
+        # cap.release()
+        # cv2.destroyAllWindows()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
