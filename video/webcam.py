@@ -1,6 +1,9 @@
 import cv2
 from .video_input import VideoInput
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Webcam(VideoInput):
@@ -20,13 +23,12 @@ class Webcam(VideoInput):
 
     def read_frame(self):
         valid, frame = self.cap.read()
-        # frame = cv2.flip(frame, 1)
         return frame
 
 
     def cleanup(self):
         self.cap.release()
-
+        logger.debug('Webcam released')
 
 
 if __name__ == '__main__':

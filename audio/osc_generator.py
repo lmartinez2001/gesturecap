@@ -1,23 +1,18 @@
 from typing import Dict, Any
 from pythonosc import udp_client
-from audio_generator import AudioGenerator
+from .audio_generator import AudioGenerator
+import logging
 
-class SimpleOSCGenerator(AudioGenerator):
 
-    def __init__(
-            self,
-            ip: str = '127.0.0.1',
-            port: int = 11111,
-    ):
-        self.client = udp_client.SimpleUDPClient(osc_ip, osc_port)
+logger = logging.getLogger(__name__)
+
+
+class OSCGenerator(AudioGenerator):
+
+    def __init__(self, ip: str = '127.0.0.1', port: int = 11111):
         super().__init__()
-
-
-
-    def update_data_to_send(self):
-        assert (self.freq_route in params) and (self.vol_route in params)
-        # Additional processing if required
-        self.params: Dict[str, Any] = params
+        self.client = udp_client.SimpleUDPClient(ip, port)
+        logger.info(f'OSC generator initialized at {ip}:{port}')
 
 
     def output_audio(self):
@@ -25,5 +20,15 @@ class SimpleOSCGenerator(AudioGenerator):
         Ouputs OSC signals so that the actual sound generation is handled
         by an external tool (like puredata or Max/MSP)
         """
-        for route, val in self.audio_params:
-            self.client.send_message(route, val)
+        if self.data_to_send:
+
+            if type(self.data_to_send) != dict:
+                raise TypeError('OSC generator expects dict type with format Dict[str, Any]')
+            else:
+                for route, val in self.data_to_send.items():
+                    route = f'/{route}' if not route.startswith('/') else route
+                    self.client.send_message(route, val)
+
+
+    def cleanup(self):
+        pass

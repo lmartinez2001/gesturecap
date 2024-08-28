@@ -1,50 +1,46 @@
 import logging
-for abc import ABC, abstractmethod
+from abc import ABC, abstractmethod
 from typing import Any
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 
 logger = logging.getLogger(__name__)
 
-class AudioGenerator(ABC):
+class AudioGenerator(ABC, Thread):
 
     def __init__(self):
-        self.is_running: bool = False
-        self.data_to_send: Any = None
-        self.thread: Thread = None
-        self.setup()
+        super().__init__()
+        self.stop_event = Event()
+        self._data_to_send: Any = None
+        self._data_lock = Lock()
 
 
-    @abstractmethod
-    def setup(self) -> None:
-        pass
+    @property
+    def data_to_send(self):
+        with self._data_lock:
+            return self._data_to_send
 
 
-    @abstractmethod
-    def output_audio(self) -> None:
-        pass
-
-
-    @abstractmethod
-    def update_data_to_send(self) -> Any:
-        pass
+    @data_to_send.setter
+    def data_to_send(self, value):
+        with self._data_lock:
+            self._data_to_send = value
 
 
     @abstractmethod
     def cleanup(self) -> None:
         pass
 
-    def _audio_loop(self):
-        while self.is_running:
-            self.data_to_send = self.update_data_to_send()
+    @abstractmethod
+    def output_audio(self) -> None:
+        pass
+
+    def run(self):
+        while not self.stop_event.is_set():
+            # self.data_to_send = self.update_data_to_send()
             self.output_audio()
 
-    def start(self):
-        logger.info('Starting audio stream')
-        self.thread = Thread(target=self._audio_loop, daemon=True)
-        self.thread.start()
 
     def stop(self):
         logger.info('Stopping audio stream')
-        self.is_running = False
-        self.thread.join()
+        self.stop_event.set()
         self.cleanup()

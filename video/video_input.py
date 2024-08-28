@@ -12,7 +12,6 @@ class VideoInput(ABC, Thread):
         super().__init__()
         self.configure()
         self.frame = None
-        # self.is_running = False
         self.stop_event = Event()
         self.frame_available = Event()
 
@@ -32,21 +31,10 @@ class VideoInput(ABC, Thread):
         pass
 
 
-    # def start(self):
-    #     self.is_running = True
-    #     self.thread = Thread(target=self._capture_loop, daemon=True)
-    #     self.thread.start()
-
     def run(self):
         while not self.stop_event.is_set():
             self.frame = self.read_frame()
             self.frame_available.set()
-
-
-    # def _capture_loop(self):
-    #     while self.is_running:
-    #         self.frame = self.read_frame()
-    #         self.frame_available.set()
 
 
     def stop(self):

@@ -110,6 +110,7 @@ class Flircam(VideoInput):
         self.cam.DeInit()
         del self.cam
         self.system.ReleaseInstance()
+        logger.debug('Released Flir camera')
 
 
 

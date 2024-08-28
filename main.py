@@ -10,20 +10,28 @@ from models.hand_pose import HandLandmarker
 # Video module
 from video import Webcam
 
+# Gesture mapper module
 from gesture_mapper import PinchGestureMapper
+
+# Audio module
+from audio import OSCGenerator
+
 
 logger = logging.getLogger(__name__)
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     config = Config()
     cam = Webcam(0)
     hand_landmarker = HandLandmarker(config)
     mapper = PinchGestureMapper()
+    osc_generator = OSCGenerator()
 
+    # Starting threads
     cam.start()
+    osc_generator.start()
 
     try:
         while cam.is_alive():
@@ -35,11 +43,10 @@ def main():
 
             # mapping between gestures and audio params
             audio_params = mapper.process_detection_results(detection_res)
-            print(audio_params)
 
             # sending audio params
-            # audio_generator.update_audio_params(audio_params)
-
+            osc_generator.data_to_send = audio_params
+            print(audio_params)
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):
@@ -49,6 +56,7 @@ def main():
 
     finally:
         cam.stop()
+        osc_generator.stop()
 
 
 if __name__ == "__main__":

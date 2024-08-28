@@ -1,3 +1,3 @@
-from .utils import AudioThread
+from .osc_generator import OSCGenerator
 
-__all__ = ['AudioThread']
+__all__ = ['OSCGenerator']
