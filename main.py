@@ -15,8 +15,7 @@ from gesture_mapper import PinchGestureMapper
 
 # Audio module
 from audio import OSCGenerator
-
-
+from audio import SinewaveGenerator
 logger = logging.getLogger(__name__)
 
 
