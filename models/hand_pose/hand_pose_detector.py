@@ -8,10 +8,12 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
 # For typing
-from typing import List
+from typing import List, Dict, Any
 from mediapipe.tasks.python.components.containers import landmark as landmark_module
 
 from mediapipe.framework.formats import landmark_pb2
+
+from utils.mediapipe import convert_to_landmark_list
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +36,15 @@ class HandLandmarker:
         self.hands = vision.HandLandmarker.create_from_options(options)
 
 
-    def detect_hand_pose(self, image: np.ndarray):
+    def detect_hand_pose(self, image: np.ndarray) -> Dict[str, List[List[Any]]]:
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
         detection_result = self.hands.detect(mp_image)
-
-        return detection_result.hand_landmarks
+        res = {
+            'landmarks': detection_result.hand_landmarks,
+            'handedness': detection_result.handedness
+        }
+        return res
 
 
     def convert_to_landmark_list(self, normalized_landmarks: List[landmark_module.NormalizedLandmark]) -> landmark_pb2.NormalizedLandmarkList:

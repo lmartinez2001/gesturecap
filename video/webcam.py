@@ -20,7 +20,7 @@ class Webcam(VideoInput):
 
     def read_frame(self):
         valid, frame = self.cap.read()
-        frame = cv2.flip(frame, 1)
+        # frame = cv2.flip(frame, 1)
         return frame
 
 

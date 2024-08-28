@@ -10,25 +10,9 @@ from models.hand_pose import HandLandmarker
 # Video module
 from video import Webcam
 
-# Hand strategy module
+from gesture_mapper import PinchGestureMapper
 
 logger = logging.getLogger(__name__)
-
-# def get_cam(idx) -> cv2.VideoCapture:
-#     cap = cv2.VideoCapture(idx)
-#     logger.info(f'Camera loaded with index {idx}')
-
-#     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-#     if not cap.isOpened():
-#         raise RuntimeError('Failed to open webcam')
-#     return cap
-
-# from video import webcam, flircam
-
-# cam = webcam/filrcam(bunch of options)
-# hand_tracker = HandTracker(device='cpu')
-# while...
-#   frame = cam.read()
 
 
 def main():
@@ -40,6 +24,7 @@ def main():
 
     hand_landmarker = HandLandmarker(config)
 
+    mapper = PinchGestureMapper()
     # display = Display(hand_tracker, config)
 
     # audio_thread = AudioThread(config)
@@ -50,10 +35,21 @@ def main():
 
     try:
         while cam.is_running:
+            # Frame acquisition
             frame = cam.get_frame()
-            landmarks = hand_landmarker.detect_hand_pose(frame)
-            print(len(landmarks))
 
+            # hand landmarker output
+            detection_res = hand_landmarker.detect_hand_pose(frame)
+
+            # mapping between gestures and audio params
+            audio_params = mapper.process_detection_results(detection_res)
+            print(audio_params)
+
+            # sending audio params
+            # audio_generator.update_audio_params(audio_params)
+
+
+            # audio_gen.to_send = new_values
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):
                 break

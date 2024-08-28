@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import threading 
+from threading import Thread, Event
 import logging
 
 import numpy as np
@@ -12,7 +12,7 @@ class VideoInput(ABC):
         self.configure()
         self.frame = None
         self.is_running = False
-        self.frame_available = threading.Event()
+        self.frame_available = Event()
 
 
     @abstractmethod
@@ -32,7 +32,7 @@ class VideoInput(ABC):
 
     def start(self):
         self.is_running = True
-        self.thread = threading.Thread(target=self._capture_loop, daemon=True)
+        self.thread = Thread(target=self._capture_loop, daemon=True)
         self.thread.start()
 
 
