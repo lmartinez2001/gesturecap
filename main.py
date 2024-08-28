@@ -19,22 +19,14 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     config = Config()
-
     cam = Webcam(0)
-
     hand_landmarker = HandLandmarker(config)
-
     mapper = PinchGestureMapper()
-    # display = Display(hand_tracker, config)
-
-    # audio_thread = AudioThread(config)
-    # audio_thread.start()
-    # logger.info('Audio thread started')
 
     cam.start()
 
     try:
-        while cam.is_running:
+        while cam.is_alive():
             # Frame acquisition
             frame = cam.get_frame()
 
@@ -49,7 +41,6 @@ def main():
             # audio_generator.update_audio_params(audio_params)
 
 
-            # audio_gen.to_send = new_values
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):
                 break
@@ -58,10 +49,6 @@ def main():
 
     finally:
         cam.stop()
-        # audio_thread.stop()
-        # audio_thread.join()
-        # cap.release()
-        # cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

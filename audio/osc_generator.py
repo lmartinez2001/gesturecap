@@ -1,5 +1,5 @@
-from pythonosc import udp_client
 from typing import Dict, Any
+from pythonosc import udp_client
 from audio_generator import AudioGenerator
 
 class SimpleOSCGenerator(AudioGenerator):
@@ -8,27 +8,16 @@ class SimpleOSCGenerator(AudioGenerator):
             self,
             ip: str = '127.0.0.1',
             port: int = 11111,
-            freq_route: str = '/frequency', # NOT OPTIMAL AT ALL
-            vol_route: str: = '/volume'
     ):
         self.client = udp_client.SimpleUDPClient(osc_ip, osc_port)
-        self.freq_route = freq_route
-        self.vol_route = vol_route
         super().__init__()
 
 
-    def setup(self):
-        pass
-
-    def
 
     def update_data_to_send(self):
-        """
-        It's assumed that the output
-        """
         assert (self.freq_route in params) and (self.vol_route in params)
         # Additional processing if required
-        self.audio_params: Dict[str, Any] = params
+        self.params: Dict[str, Any] = params
 
 
     def output_audio(self):
