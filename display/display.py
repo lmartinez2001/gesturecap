@@ -7,79 +7,55 @@ import matplotlib.pyplot as plt
 import mediapipe as mp
 from mediapipe.python.solutions.drawing_utils import DrawingSpec
 
+from threading import Thread, Event, Lock
+
 
 logger = logging.getLogger(__name__)
 
-class Display:
-    def __init__(self, hand_tracker, config):
-        self.config = config
-        self.notes: dict = config.audio.note_frequencies
+class Display(Thread):
 
-        self.mp_drawing = mp.solutions.drawing_utils
-        self.mp_drawing_styles = mp.solutions.drawing_styles
-        self.landmarks_style = DrawingSpec(
-            color=config.display.landmarks_color
-        )
-        self.connections_style = DrawingSpec(
-            color=config.display.connections_color,
-            thickness=config.display.connections_thickness
-        )
-        self.mp_hands = mp.solutions.hands
-
-        self.tracker = hand_tracker
+    def __init__(self, width=800, height=600, display_name='Display'):
+        super().__init__()
+        self.display_name = display_name
+        self._frame = np.zeros((width, height, 3))
+        self.components = []
+        self.stop_event = Event()
+        self.lock = Lock()
+        self.width = width
+        self.height = height
         logger.info('Display class initialized')
 
 
-    def _draw_note_lines(self, frame: np.ndarray) -> np.ndarray:
-        h, w, _ = frame.shape
-        for note, freq in self.notes.items():
-            x = int((freq - self.config.audio.min_freq) / (self.config.audio.max_freq - self.config.audio.min_freq) * w)
-            frame = cv2.line(frame, (x, 0), (x, h), self.config.display.note_lines_color, 1)
-            frame = cv2.putText(frame, note, (x + 5, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-        return frame
+    @property
+    def frame(self):
+        with self.lock:
+            return self._frame.copy()
 
 
-    def _draw_hand_landmarks(self, frame: np.ndarray) -> np.ndarray:
-        row, col, _ = frame.shape
-        if self.tracker.hand_landmarks['Right']:
-            self.mp_drawing.draw_landmarks(
-                image=frame,
-                landmark_list=self.tracker.hand_landmarks['Right'],
-                connections=self.mp_hands.HAND_CONNECTIONS,
-                landmark_drawing_spec=self.landmarks_style,
-                connection_drawing_spec=self.connections_style)
+    @frame.setter
+    def frame(self, new_frame):
+        with self.lock:
+            self._frame = cv2.resize(new_frame, (self.width, self.height))
 
 
-            cx, cy = int(self.tracker.smoothed_barycenter['Right'][0] * col), int(self.tracker.smoothed_barycenter['Right'][1] * row)
-            frame = cv2.circle(
-                frame,
-                (cx, cy),
-                self.config.display.barycenter_radius,
-                self.config.display.barycenter_color,
-                -1
-            )
-
-        if self.tracker.hand_landmarks['Left']:
-            self.mp_drawing.draw_landmarks(
-                image=frame,
-                landmark_list=self.tracker.hand_landmarks['Left'],
-                connections=self.mp_hands.HAND_CONNECTIONS,
-                landmark_drawing_spec=self.landmarks_style,
-                connection_drawing_spec=self.connections_style)
+    def add_component(self, component):
+        with self.lock:
+            self.components.append(component)
 
 
-            cx, cy = int(self.tracker.smoothed_barycenter['Left'][0] * col), int(self.tracker.smoothed_barycenter['Left'][1] * row)
-            frame = cv2.circle(
-                frame,
-                (cx, cy),
-                self.config.display.barycenter_radius,
-                self.config.display.barycenter_color,
-                -1
-            )
-        return frame
+    def run(self):
+        while not self.stop_event.is_set():
+            display_frame = self.frame.copy()
+            for comp in self.components:
+                comp(display_frame)
+
+            cv2.imshow(self.display_name, display_frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.stop_event.set()
+                break
+        cv2.destroyAllWindows()
 
 
-    def update(self, frame: np.ndarray) -> None:
-        frame = self._draw_hand_landmarks(frame)
-        frame = self._draw_note_lines(frame)
-        cv2.imshow('Output', frame)
+    def stop(self):
+        logger.info('Stopping display stream')
+        self.stop_event.set()

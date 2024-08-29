@@ -24,3 +24,4 @@ class SinewaveGenerator(AudioGenerator):
 
 
     def generate_sinewave(self):
+        pass
