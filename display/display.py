@@ -8,6 +8,7 @@ import mediapipe as mp
 from mediapipe.python.solutions.drawing_utils import DrawingSpec
 
 from threading import Thread, Event, Lock
+import time
 
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,9 @@ class Display(Thread):
         self.lock = Lock()
         self.width = width
         self.height = height
+        self.frame_count = 0
+        self.fps = 0
+        self.last_fps_update = time.time()
         logger.info('Display class initialized')
 
 
@@ -36,6 +40,14 @@ class Display(Thread):
     def frame(self, new_frame):
         with self.lock:
             self._frame = cv2.resize(new_frame, (self.width, self.height))
+            self.frame_count += 1
+            current_time = time.time()
+            time_diff = current_time - self.last_fps_update
+            if time_diff >= 1.0:  # update fps every second
+                self.fps = self.frame_count / time_diff
+                self.frame_count = 0
+                self.last_fps_update = current_time
+
 
 
     def add_component(self, component):
@@ -55,7 +67,7 @@ class Display(Thread):
                 break
         cv2.destroyAllWindows()
 
-
+       
     def stop(self):
         logger.info('Stopping display stream')
         self.stop_event.set()

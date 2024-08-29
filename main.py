@@ -41,7 +41,7 @@ def main():
     osc_generator.start()
 
     # Display configuration
-    fps_counter = create_fps_counter()
+    fps_counter = create_fps_counter(display)
     display.add_component(fps_counter)
     display.start()
 
