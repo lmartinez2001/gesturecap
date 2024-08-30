@@ -8,7 +8,7 @@ class PinchGestureMapper(Mapper):
         pass
 
 
-    def process_detection_results(self, raw_landmarker_data):
+    def process_detection_results(self, raw_landmarker_data) -> dict:
         hands_lms =  raw_landmarker_data['landmarks']
         handedness =  raw_landmarker_data['handedness']
         assert len(hands_lms) == len(handedness)

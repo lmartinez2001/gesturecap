@@ -1,17 +1,17 @@
 import logging
-
+import numpy as np
 import cv2
 
 from config import Config
 
 # AI models
-from models.hand_pose import HandLandmarker
+from feature_extractor import HandLandmarker, FrameDiffCalculator
 
 # Video module
 from video import Webcam
 
 # Gesture mapper module
-from gesture_mapper import PinchGestureMapper
+from feature_mapper import PinchGestureMapper, PulseMapper
 
 # Audio module
 from audio import OSCGenerator
@@ -30,42 +30,55 @@ def main():
     config = Config()
 
     cam = Webcam(0)
-    hand_landmarker = HandLandmarker(config)
-    mapper = PinchGestureMapper()
+
+    # FRAME FEATURE EXTRACTOR
+    # hand_landmarker = HandLandmarker(config)
+    frame_diff_calculator = FrameDiffCalculator()
+
+    # FEATURES TO AUDIO DATA MAPPER
+    mapper = PulseMapper(threshold=3)
+
+    # AUDIO GENERATOR
     osc_generator = OSCGenerator()
 
+    # FEEDBACK DISPLAY
     display = Display()
 
     # Starting threads
     cam.start()
     osc_generator.start()
 
-    # Display configuration
-    fps_counter = create_fps_counter(display)
-    display.add_component(fps_counter)
+    # Display config
+    # fps_counter = create_fps_counter(display)
+    # display.add_component(fps_counter)
     display.start()
 
     try:
         while cam.is_alive():
             # Frame acquisition
-            frame = cam.get_frame()
+            frame: np.ndarray = cam.get_frame()
 
-            # hand landmarker output
-            detection_res = hand_landmarker.detect_hand_pose(frame)
+            # feature extractor output
+            # detection_res = hand_landmarker.detect_hand_pose(frame)
+            diff_val, frame_diff = frame_diff_calculator.process(frame)
 
-            # mapping between gestures and audio params
-            audio_params = mapper.process_detection_results(detection_res)
+            # mapping between features and audio data
+            # audio_params = mapper.process_detection_results(detection_res)
+            # audio_pulse = mapper.process_detection_results(frame_diff)
 
             # sending audio params
-            osc_generator.data_to_send = audio_params
-            logger.debug(f'Sent audio params: {audio_params}')
+            # osc_generator.data_to_send: dict = audio_pulse
+            # logger.debug(f'Sent audio params: {audio_params}')
 
             # frame to display
-            display.frame = frame
+            display.frame = frame_diff
 
-            # key = cv2.waitKey(1) & 0xFF
-            # if key == ord("q"):
-            #     break
+        while cam.is_alive():
+
+            osc_generator.data_to_send = {
+                'pulse':1
+            }
+
     except KeyboardInterrupt:
         pass
 

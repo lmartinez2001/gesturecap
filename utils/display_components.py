@@ -1,9 +1,11 @@
 import time
 import cv2
+import numpy as np
 
 
 def create_fps_counter(display):
     def fps_element(frame):
+        assert frame.ndim == 3
         fps_text = f"FPS: {display.fps:.1f}"
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 1.5
@@ -31,3 +33,16 @@ def create_fps_counter(display):
                     font, font_scale, text_color, font_thickness)
 
     return fps_element
+
+
+def draw_point(frame: np.ndarray, coords: tuple, radius: int, color: tuple = (0,0,255)):
+    assert frame.ndim == 3
+    cv2.circle(frame, coords, radius, color, thickness=-1)
+
+# NOT WORKING YET
+def draw_landmarks(frame: np.ndarray, landmarks, radius: int, color: tuple = (0, 0, 255)):
+    assert frame.ndim == 3
+    h, w, _ = frame.shape
+
+    for lms in landmarks:
+        draw_point(frame, (int(w * lms.x), int(h * lms.y)), radius, color)
