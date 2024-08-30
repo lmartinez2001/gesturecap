@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 class AudioGenerator(ABC, Thread):
 
+
     def __init__(self):
         super().__init__()
         self.stop_event = Event()
@@ -34,9 +35,9 @@ class AudioGenerator(ABC, Thread):
     def output_audio(self) -> None:
         pass
 
+
     def run(self):
         while not self.stop_event.is_set():
-            # self.data_to_send = self.update_data_to_send()
             self.output_audio()
 
 

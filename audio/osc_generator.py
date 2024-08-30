@@ -28,7 +28,7 @@ class OSCGenerator(AudioGenerator):
                 for route, val in self.data_to_send.items():
                     route = f'/{route}' if not route.startswith('/') else route
                     self.client.send_message(route, val)
-                    # logger.debug(f'Sent {val} to {route} route')
+                    if val == 1: logger.debug(f'Sent {val} to {route} route')
 
 
     def cleanup(self):
