@@ -33,11 +33,12 @@ def main():
     cam = Webcam(0)
 
     # FRAME FEATURE EXTRACTOR
-    # hand_landmarker = HandLandmarker(config)
-    frame_diff_calculator = FrameDiffCalculator()
+    hand_landmarker = HandLandmarker(config)
+    # frame_diff_calculator = FrameDiffCalculator()
 
     # FEATURES TO AUDIO DATA MAPPER
-    mapper = PulseMapper(threshold=3, cooldown=500)
+    # mapper = PulseMapper(threshold=3, cooldown=500)
+    mapper = PinchGestureMapper()
 
     # AUDIO GENERATOR
     osc_generator = OSCGenerator()
@@ -51,8 +52,8 @@ def main():
     osc_generator.start()
 
     # Display config
-    # fps_counter = create_fps_counter(display)
-    # display.add_component(fps_counter)
+    fps_counter = create_fps_counter(display)
+    display.add_component(fps_counter)
     display.start()
 
     try:
@@ -61,27 +62,22 @@ def main():
             frame: np.ndarray = cam.get_frame()
 
             # feature extractor output
-            # detection_res = hand_landmarker.detect_hand_pose(frame)
-            diff_val, frame_diff = frame_diff_calculator.process(frame)
+            detection_res = hand_landmarker.detect_hand_pose(frame)
+            # diff_val, frame_diff = frame_diff_calculator.process(frame)
             # print(diff_val)
 
             # mapping between features and audio data
-            # audio_params = mapper.process_detection_results(detection_res)
-            audio_pulse: int = mapper.process_detection_results(diff_val) # 0 or 1
+            audio_params = mapper.process_detection_results(detection_res)
+            # audio_pulse: int = mapper.process_detection_results(diff_val) # 0 or 1
 
-            print(audio_pulse)
+            # print(audio_pulse)
 
             # sending audio params
-            osc_generator.data_to_send: dict = audio_pulse
+            osc_generator.data_to_send: dict = audio_params
 
             # frame to display
-            display.frame = frame_diff
+            display.frame = frame
 
-        # while cam.is_alive() :
-
-            # osc_generator.data_to_send = {
-            #     'pulse':1
-            # }
 
     except KeyboardInterrupt:
         pass

@@ -5,7 +5,10 @@ import math
 class PinchGestureMapper(Mapper):
 
     def __init__(self):
-        pass
+        self.audio_params = {
+            'frequency': 440,
+            'volume': 0.5
+        }
 
 
     def process_detection_results(self, raw_landmarker_data) -> dict:
@@ -13,10 +16,6 @@ class PinchGestureMapper(Mapper):
         handedness =  raw_landmarker_data['handedness']
         assert len(hands_lms) == len(handedness)
 
-        audio_params = {
-            'frequency': 440,
-            'volume': 0.5
-        }
 
         if hands_lms:
             for lms, handedness in zip(hands_lms, handedness):
@@ -30,9 +29,7 @@ class PinchGestureMapper(Mapper):
                         freq = 100000/((index_pos.x**2) * 1000 + 100)
                         volume = index_pos.y
 
-                        audio_params = {
-                            'frequency': freq,
-                            'volume': volume
-                        }
+                        self.audio_params['frequency'] = freq
+                        self.audio_params['volume'] = volume
 
         return audio_params
