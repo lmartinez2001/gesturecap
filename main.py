@@ -33,12 +33,12 @@ def main():
     cam = Webcam(0)
 
     # FRAME FEATURE EXTRACTOR
-    hand_landmarker = HandLandmarker(config)
-    # frame_diff_calculator = FrameDiffCalculator()
+    # hand_landmarker = HandLandmarker(config)
+    frame_diff_calculator = FrameDiffCalculator()
 
     # FEATURES TO AUDIO DATA MAPPER
-    # mapper = PulseMapper(threshold=3, cooldown=500)
-    mapper = PinchGestureMapper()
+    # mapper = PinchGestureMapper()
+    mapper = PulseMapper(threshold=1.25, cooldown=500)
 
     # AUDIO GENERATOR
     osc_generator = OSCGenerator()
