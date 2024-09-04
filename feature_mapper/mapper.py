@@ -7,5 +7,5 @@ class Mapper(ABC):
         pass
 
     @abstractmethod
-    def process_detection_results(results) -> Any:
+    def process_features(features) -> Any:
         pass

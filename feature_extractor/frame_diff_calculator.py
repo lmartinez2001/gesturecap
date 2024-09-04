@@ -16,7 +16,7 @@ class FrameDiffCalculator(FeatureExtractor):
             mean_diff = np.mean(frame_diff)
 
         self.previous_frame = current_frame.copy()
-        return mean_diff, frame_diff
+        return mean_diff
 
 
 

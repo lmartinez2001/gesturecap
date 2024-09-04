@@ -1,0 +1,21 @@
+scenario: Pipeline timing measurement
+
+video_input:
+  class: Webcam
+  params:
+    cam_index: 0
+
+feature_extractor:
+  class: FrameDiffCalculator
+
+feature_mapper:
+  class: PulseMapper
+  params:
+    threshold: 1.25
+    cooldown: 400
+
+audio_generator:
+  class: OSCGenerator
+  params:
+    ip: "127.0.0.1"
+    port: 11111
