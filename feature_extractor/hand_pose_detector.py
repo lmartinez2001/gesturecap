@@ -14,10 +14,11 @@ from mediapipe.tasks.python.components.containers import landmark as landmark_mo
 from mediapipe.framework.formats import landmark_pb2
 
 from utils.mediapipe import convert_to_landmark_list
+from .feature_extractor import FeatureExtractor
 
 logger = logging.getLogger(__name__)
 
-class HandLandmarker:
+class HandLandmarker(FeatureExtractor):
     def __init__(self, config=None, n_hands=2, device: str = 'cpu'):
 
         self.mp_hands = mp.solutions.hands
@@ -36,7 +37,7 @@ class HandLandmarker:
         self.hands = vision.HandLandmarker.create_from_options(options)
 
 
-    def detect_hand_pose(self, image: np.ndarray) -> Dict[str, List[List[Any]]]:
+    def process(self, image: np.ndarray) -> Dict[str, List[List[Any]]]:
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
         detection_result = self.hands.detect(mp_image)
@@ -47,14 +48,14 @@ class HandLandmarker:
         return res
 
 
-    def convert_to_landmark_list(self, normalized_landmarks: List[landmark_module.NormalizedLandmark]) -> landmark_pb2.NormalizedLandmarkList:
-        landmark_list = landmark_pb2.NormalizedLandmarkList()
-        for landmark in normalized_landmarks:
-            new_landmark = landmark_list.landmark.add()
-            new_landmark.x = landmark.x
-            new_landmark.y = landmark.y
-            new_landmark.z = landmark.z
-        return landmark_list
+    # def convert_to_landmark_list(self, normalized_landmarks: List[landmark_module.NormalizedLandmark]) -> landmark_pb2.NormalizedLandmarkList:
+    #     landmark_list = landmark_pb2.NormalizedLandmarkList()
+    #     for landmark in normalized_landmarks:
+    #         new_landmark = landmark_list.landmark.add()
+    #         new_landmark.x = landmark.x
+    #         new_landmark.y = landmark.y
+    #         new_landmark.z = landmark.z
+    #     return landmark_list
 
 
     def draw_landmarks(self, image, hand_landmarks: List[List[landmark_module.NormalizedLandmark]]):

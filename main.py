@@ -4,7 +4,7 @@ import cv2
 
 from config import Config
 
-# AI models
+# Feature extractors
 from feature_extractor import HandLandmarker, FrameDiffCalculator
 
 # Video module
@@ -14,8 +14,7 @@ from video import Webcam
 from feature_mapper import PinchGestureMapper, PulseMapper
 
 # Audio module
-from audio import OSCGenerator
-from audio import SinewaveGenerator
+from audio import OSCGenerator, SinewaveGenerator
 
 # Display
 from display import Display
@@ -33,12 +32,12 @@ def main():
     cam = Webcam(0)
 
     # FRAME FEATURE EXTRACTOR
-    # hand_landmarker = HandLandmarker(config)
-    frame_diff_calculator = FrameDiffCalculator()
+    hand_landmarker = HandLandmarker(config)
+    # frame_diff_calculator = FrameDiffCalculator()
 
     # FEATURES TO AUDIO DATA MAPPER
-    # mapper = PinchGestureMapper()
-    mapper = PulseMapper(threshold=1.25, cooldown=500)
+    mapper = PinchGestureMapper()
+    # mapper = PulseMapper(threshold=1.25, cooldown=500)
 
     # AUDIO GENERATOR
     osc_generator = OSCGenerator()
@@ -62,12 +61,12 @@ def main():
             frame: np.ndarray = cam.get_frame()
 
             # feature extractor output
-            # detection_res = hand_landmarker.detect_hand_pose(frame)
-            diff_val, frame_diff = frame_diff_calculator.process(frame)
+            detection_res = hand_landmarker.process(frame)
+            # diff_val, frame_diff = frame_diff_calculator.process(frame)
 
             # mapping between features and audio data
-            # audio_params = mapper.process_detection_results(detection_res)
-            audio_params: int = mapper.process_detection_results(diff_val) # 0 or 1
+            audio_params = mapper.process_detection_results(detection_res)
+            # audio_params: int = mapper.process_detection_results(diff_val) # 0 or 1
 
 
             # sending audio params

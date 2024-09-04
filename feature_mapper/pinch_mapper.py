@@ -32,4 +32,4 @@ class PinchGestureMapper(Mapper):
                         self.audio_params['frequency'] = freq
                         self.audio_params['volume'] = volume
 
-        return audio_params
+        return self.audio_params
