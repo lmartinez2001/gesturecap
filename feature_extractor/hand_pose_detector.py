@@ -3,6 +3,7 @@ import logging
 
 import cv2
 import numpy as np
+
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
@@ -10,16 +11,30 @@ from mediapipe.tasks.python import vision
 # For typing
 from typing import List, Dict, Any
 from mediapipe.tasks.python.components.containers import landmark as landmark_module
-
 from mediapipe.framework.formats import landmark_pb2
-
 from utils.mediapipe import convert_to_landmark_list
+
 from .feature_extractor import FeatureExtractor
 
 logger = logging.getLogger(__name__)
 
+
 class HandLandmarker(FeatureExtractor):
-    def __init__(self, config=None, n_hands=2, device: str = 'cpu'):
+    """
+    Extracts hand landmarks from frames. It uses the Mediapipe hand landmarker model to detect hands.
+    In addition to the hand(s) landmarks, handedness is returned as well
+
+
+    Parameters
+    ---
+    n_hands: int, default=2
+        Number of hands to be detected by the model on a frame
+
+    device: str, default='cpu'
+        Determines the delegate used for inference.
+        Possible values: 'cpu' or 'gpu'
+    """
+    def __init__(self, n_hands=2, device: str = 'cpu'):
 
         self.mp_hands = mp.solutions.hands
         self.mp_drawing = mp.solutions.drawing_utils
@@ -38,6 +53,22 @@ class HandLandmarker(FeatureExtractor):
 
 
     def process(self, image: np.ndarray) -> Dict[str, List[List[Any]]]:
+        """
+        Implementation of the abstract method coming from feature_extractor.FeatureExtractor class.
+        Runs mediapipe model inference on the frame. The model determines landmarks and handedness of detected hand(s)
+
+
+        Parameters
+        ---
+        image: np.ndarray, required
+            Frame to be processed
+
+
+        Returns
+        ---
+        res: dict[lansmarks, handedness] or None
+            Hand landmarker detection results or None if no hand is detected
+        """
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
         detection_result = self.hands.detect(mp_image)
@@ -48,17 +79,8 @@ class HandLandmarker(FeatureExtractor):
         return res
 
 
-    # def convert_to_landmark_list(self, normalized_landmarks: List[landmark_module.NormalizedLandmark]) -> landmark_pb2.NormalizedLandmarkList:
-    #     landmark_list = landmark_pb2.NormalizedLandmarkList()
-    #     for landmark in normalized_landmarks:
-    #         new_landmark = landmark_list.landmark.add()
-    #         new_landmark.x = landmark.x
-    #         new_landmark.y = landmark.y
-    #         new_landmark.z = landmark.z
-    #     return landmark_list
-
-
     def draw_landmarks(self, image, hand_landmarks: List[List[landmark_module.NormalizedLandmark]]):
+       
         # List with as many elements as detected hands
         if hand_landmarks:
             # One list per hand

@@ -5,13 +5,48 @@ import logging
 logger = logging.getLogger(__name__)
 
 class PulseMapper(Mapper):
+    """
+    Maps any float value to a binary signal sent to the audio output module.
+    This mapper is mainly useful for timing measurement purposes.
+    For instance, if it's coupled with the feature_extractor.FrameDiffCalculator class, it allows to send a pulse whenever a movement between two frames is detected.
 
+
+    Parameters
+    ---
+    threshold: float, required
+        Used to binarize the incoming value in the process_features function
+
+    cooldown: int, required
+        Lower bound of the delay in ms between two pulses
+    """
     def __init__(self, threshold: float, cooldown: int):
         self.thresh = threshold
         self.cooldown = cooldown
         self.last_pulse_time = 0
 
-    def process_features(self, value: float):
+
+    def process_features(self, value: float) -> dict:
+        """
+        Abstract method implementation.
+        Send an pulse, as a binary variable whenever the value variable is above a threshhold.
+        As the whole pipeline is intended to run at a high refresh rate,
+        a cooldown is setup to prevent the pulse from being continuously sent.
+        This can happen for example when a movements lasts for several frames (which occurs often) but we're actually interested in the beginning of the movement.
+
+        For other usecases where pulses sent continuously is not an issue, the cooldown can just be set to 0, hence disabled.
+
+
+        Parameters
+        ---
+        value: float, required
+            To be compared with the threshold attribute
+
+
+        Returns
+        ---
+        mapped: dict
+            Value of the pulse. Either 0 or 1
+        """
         mapped = {
             'pulse': 0
         }
