@@ -39,16 +39,31 @@ class VideoInput(ABC, Thread):
 
     @abstractmethod
     def cleanup(self) -> None:
+        """
+        Cleanup the current context.
+        For example, the code in charge of the camera unbinding should be written in this function
+        It's  called in the `stop` function
+        """
         pass
 
 
     def run(self):
+        """
+        Abstract method implementation coming from threading.Thread
+        It contains the main loop of this thread. $
+        At each iteration, it grabs a new frame and it signals that the image is available via the frame_available threading.Event
+        The while loop stops when the stop_event evnet is triggered. See: function`stop`
+        """
         while not self.stop_event.is_set():
             self.frame = self.read_frame()
             self.frame_available.set()
 
 
     def stop(self):
+        """
+        Abstract method implementation coming from threading.Thread
+        When called, it triggers the stop_event event and calls the cleanup method
+        """
         logger.info('Stopping video stream')
         self.stop_event.set()
         self.cleanup()

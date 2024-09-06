@@ -53,15 +53,15 @@ def main(scenario_file: str):
         pass
 
     finally:
+        # Stop all the threads
         display.stop()
         scenario.video_input.stop()
         scenario.audio_generator.stop()
 
 import argparse
-
 parser = argparse.ArgumentParser()
 parser.add_argument('-s', '--scenario', type=str, help='Scenario to load (.yml format)')
-
+# ENTRY POINT
 if __name__ == "__main__":
     args = parser.parse_args()
     main(scenario_file=args.scenario)

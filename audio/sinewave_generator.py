@@ -10,18 +10,13 @@ Moreover, this class takes audio params as a dictionary, but could be adapted to
 class SinewaveGenerator(AudioGenerator):
 
     def __init__(self):
-        pass
+        raise NotImplementedError('Sinewave generator not implemented yet')
 
     def output_audio(self):
-        if self.data_to_send:
-            if type(self.data_to_send) != dict:
-                    raise TypeError('OSC generator expects dict type with format Dict[str, Any]')
-            else:
-                print('test')
+        raise NotImplementedError('Sinewave generator not implemented yet')
 
     def cleanup(self):
-        pass
-
+        raise NotImplementedError('Sinewave generator not implemented yet')
 
     def generate_sinewave(self):
-        pass
+        raise NotImplementedError('Sinewave generator not implemented yet')

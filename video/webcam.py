@@ -7,6 +7,18 @@ logger = logging.getLogger(__name__)
 
 
 class Webcam(VideoInput):
+    """
+    Wrapper for any basic webcam.
+    It uses opencv to trigger the camera and handle the incoming video stream
+
+    Attributes
+    ---
+    cam_index: int
+        Index of the webcam to be used
+
+    cap: cv2.VideoCapture
+        Instance representing the camera cideo stream
+    """
 
     def __init__(self, cam_index=0):
         self.cam_index = cam_index
@@ -15,6 +27,10 @@ class Webcam(VideoInput):
 
 
     def configure(self):
+        """
+        Abstract method implementation
+        Instanciate the desiered camera and sets the buffer to 1 and disables frames buffering to ensure minimal latency
+        """
         self.cap = cv2.VideoCapture(self.cam_index)
         self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         if not self.cap.isOpened():
@@ -22,15 +38,24 @@ class Webcam(VideoInput):
 
 
     def read_frame(self):
+        """
+        Abstract method implementation
+        Uses cv2.VideoCapture to capture a frame
+        """
         valid, frame = self.cap.read()
         return frame
 
 
     def cleanup(self):
+        """
+        Abstract method implementation
+        """
         self.cap.release()
         logger.debug('Webcam released')
 
 
+
+# TEST
 if __name__ == '__main__':
     cam = Webcam(0)
     cam.start()

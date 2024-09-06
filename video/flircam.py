@@ -3,12 +3,36 @@ import PySpin
 import time
 import logging
 
+import numpy as np
+
 from .video_input import VideoInput
 
 logger = logging.getLogger(__name__)
 
 class Flircam(VideoInput):
+    """
+    Wrapper for Flir cameras. It's only tested on the *Blackfly S BFS-U3-04S2C*.
+    Hence default parameter values and configurations are chosen especially for this model.
+    If one consider using another Flir camera model, these parameters should be adapted.
 
+    This class is built on the top of the PySpin.py script (python wrapper for the Spinnaker SDK developped in c++)
+    For the sake of compatibility, it's strongly advised to modify existing functions instead of triggering Spinnaker SDK functions outside this class.
+
+    This wrapper relies on a persistent context created at initialization to interact with the camera.
+
+
+    Attributes
+    ---
+    system: PySpin.System
+        Persistent context allowing to connect and interact with the camera
+
+    cam: PySpin.CameraPtr
+        Reference to the camera
+
+    color_processor: PySpin.ImageProcessor
+        In charge of defining the very first processing steps after image acquisition.
+        It includes the expected raw pixel format (may vary from one camera to another) and the interpolation algorithm (can be changed according to expected image quality)
+    """
     def __init__(self):
         self.system = None
 
@@ -24,6 +48,10 @@ class Flircam(VideoInput):
 
 
     def _find_camera(self) -> None:
+        """
+        Helper function in charge of the instanciation of the camera
+        It connects to the first flir camera detected
+        """
         self.system = PySpin.System.GetInstance()
         version = self.system.GetLibraryVersion()
         logger.debug(f'Library version: {version.major}.{version.minor}.{version.type}.{version.build}')
@@ -32,18 +60,35 @@ class Flircam(VideoInput):
         logger.debug(f'{len(cam_list)} camera detected')
         if not cam_list.GetSize():
             raise Exception('No camera found')
-        cam = cam_list[0]
+        cam = cam_list[0] # first of the list although several are detected (unlikely)
         # del cam_list
         return cam
 
 
     def _init_color_processor(self, interpolation) -> PySpin.ImageProcessor:
+        """
+        Initial setup of the color processor
+
+        Parameters
+        ---
+        interpolation: required
+            Color interpolation algorithm to generate the final digital image
+            see: `PySpin.SPINNAKER_COLOR_PROCESSING_ALGORITHM...` to retrieve the list of possible algorithms
+        """
         processor = PySpin.ImageProcessor()
         processor.SetColorProcessing(interpolation)
         return processor
 
 
     def configure(self):
+        """
+        Asbtract method implementation
+        Setup camera configuration for frame acquisition.
+        To ensure maximum framerate and minimal digital preprocessing, auto exposure/gain/white-balance options are disabled.
+        For timing measurement purposes, ChunkMode is activated to get timestamps from the camera
+
+        Acquisition on the camera side is started right after the configuration setup to
+        """
         self.cam.AcquisitionMode.SetValue(PySpin.AcquisitionMode_Continuous)
         self.cam.PixelFormat.SetValue(PySpin.PixelFormat_BayerRG8)
         self.cam.BinningHorizontal.SetValue(1)
@@ -85,12 +130,16 @@ class Flircam(VideoInput):
         logger.debug(f'Camera frame rate set to: {self.cam.AcquisitionFrameRate.GetValue()} fps')
         logger.debug(f'Camera buffer size set to: {num_buffers_min}')
 
-        # LOGIC TO BE CHANGED
         logger.info('Beginning frame acquisition')
         self.cam.BeginAcquisition()
 
 
-    def read_frame(self):
+    def read_frame(self) -> np.ndarray:
+        """
+        Abstract method implementation
+        Uses PySpin to grab a frame annd convert it to a numpy array
+        Note: the numpy array provided by the GetNDArray() function is in readonly mode by default
+        """
         try:
             frame_cam = self.cam.GetNextImage()
             if frame_cam.IsIncomplete():
@@ -106,6 +155,9 @@ class Flircam(VideoInput):
 
 
     def cleanup(self):
+        """
+        Abstract method implementation
+        """
         self.cam.EndAcquisition()
         self.cam.DeInit()
         del self.cam
@@ -114,6 +166,7 @@ class Flircam(VideoInput):
 
 
 
+# TEST
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     cam = Flircam()
