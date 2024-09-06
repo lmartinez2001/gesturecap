@@ -10,17 +10,17 @@ class Webcam(VideoInput):
     """
     Wrapper for any basic webcam.
     It uses opencv to trigger the camera and handle the incoming video stream
-
-    Attributes
-    ---
-    cam_index: int
-        Index of the webcam to be used
-
-    cap: cv2.VideoCapture
-        Instance representing the camera cideo stream
     """
 
     def __init__(self, cam_index=0):
+        """
+        Initializes the Webcam.
+
+        Parameters:
+        ---
+        cam_index: int, default=0
+            The index of the webcam to use.
+        """
         self.cam_index = cam_index
         self.cap = None
         super().__init__()
@@ -29,7 +29,7 @@ class Webcam(VideoInput):
     def configure(self):
         """
         Abstract method implementation
-        Instanciate the desiered camera and sets the buffer to 1 and disables frames buffering to ensure minimal latency
+        Instanciate the desired camera and sets the buffer to 1 and disables frames buffering to ensure minimal latency
         """
         self.cap = cv2.VideoCapture(self.cam_index)
         self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)

@@ -15,15 +15,30 @@ logger = logging.getLogger(__name__)
 
 class Display(Thread):
     """
-    Display module providing a visual feedback of the video_input or any processed version of this input (it doesn't have to be the raw frame)
+    Display module providing a feedback of the video_input or any processed version of this input (it doesn't have to be the raw frame)
 
     To avoid any drop in performance, the module runs its own thread, and the image to be displayed is stored in the _frame variable.
     A setter and a getter are defined to preven from accessing this variable directly, hence avoiding concurrent access.
 
-    A system of *components* allows to had some predefined features to the display, like an FPS counter or any other relevant visual information.
+    A system of *components* allows to add some predefined features to the display, like an FPS counter or any other relevant information.
     """
 
     def __init__(self, width=800, height=600, display_name='Display'):
+        """
+        Initializes the Display module.
+
+
+        Parameters:
+        ---
+        width: int, default=800
+            The width of the display window.
+
+        height: int, default=600
+            The height of the display window.
+
+        display_name: str, default='Display'
+            The name of the display window.
+        """
         super().__init__()
         self.display_name = display_name
         self._frame = np.zeros((width, height, 3))
@@ -34,7 +49,7 @@ class Display(Thread):
         self.height = height
         self.frame_count = 0
         self.fps = 0
-        self.last_fps_update = time.time() # required for the fps_counter visual component
+        self.last_fps_update = time.time() # required for the fps_counter component
         logger.info('Display class initialized')
 
 
@@ -54,7 +69,7 @@ class Display(Thread):
         Setter for the _frame attribute
         Prevents from concurrent access with a mutex
 
-        To ensure that the framerate actually corresponds to the one of the input video stream, it's computed every time the setter is called
+        To ensure that the framerate accurately reflects the input video stream's framerate, it's computed every time the setter is called
         """
         with self.lock:
             self._frame = cv2.resize(new_frame, (self.width, self.height))
@@ -70,7 +85,12 @@ class Display(Thread):
 
     def add_component(self, component):
         """
-        Adds a component to display
+        Adds a component to the display.
+
+        Parameters:
+        ---
+        component: callable
+            A function that takes a frame as input and modifies it in-place to add visual elements.
         """
         with self.lock:
             self.components.append(component)
@@ -79,7 +99,7 @@ class Display(Thread):
     def run(self):
         """
         Abstract method implmentation from threading.Thread
-        Displays the content of the _frame variable (through its getter) after applying visual components
+        Displays the content of the _frame variable (through its getter) after applying components
         """
         while not self.stop_event.is_set():
             display_frame = self.frame.copy()

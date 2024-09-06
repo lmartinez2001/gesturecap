@@ -23,6 +23,7 @@ class VideoInput(ABC, Thread):
     def configure(self) -> None:
         """
         Allows to setup some settings or parameters specific to the video input.
+        As it's called during the initialization and most of the time needs the camera to be instanced before configuring it, the super().__init__() must be called *at the end* of the __init__ function of a subclass
         In the case of camera input, it can correspond to the camera settings or any parameter setup to trigger it.
         It can also theoretically handle videos, not only live stream devices.
         """
@@ -50,7 +51,7 @@ class VideoInput(ABC, Thread):
     def run(self):
         """
         Abstract method implementation coming from threading.Thread
-        It contains the main loop of this thread. $
+        It contains the main loop of this thread.
         At each iteration, it grabs a new frame and it signals that the image is available via the frame_available threading.Event
         The while loop stops when the stop_event evnet is triggered. See: function`stop`
         """

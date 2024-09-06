@@ -23,19 +23,21 @@ class HandLandmarker(FeatureExtractor):
     """
     Extracts hand landmarks from frames. It uses the Mediapipe hand landmarker model to detect hands.
     In addition to the hand(s) landmarks, handedness is returned as well
-
-
-    Parameters
-    ---
-    n_hands: int, default=2
-        Number of hands to be detected by the model on a frame
-
-    device: str, default='cpu'
-        Determines the delegate used for inference.
-        Possible values: 'cpu' or 'gpu'
     """
-    def __init__(self, n_hands=2, device: str = 'cpu'):
 
+    def __init__(self, n_hands=2, device: str = 'cpu'):
+        """
+        Initializes the HandLandmarker.
+
+
+        Parameters:
+        ---
+        n_hands: int, default=2
+            The maximum number of hands to detect in each frame
+
+        device: str, default = 'cpu'
+            The device to run the model on. Choose between 'cpu' and 'gpu'.
+        """
         self.mp_hands = mp.solutions.hands
         self.mp_drawing = mp.solutions.drawing_utils
         base_options = python.BaseOptions(
@@ -80,7 +82,21 @@ class HandLandmarker(FeatureExtractor):
 
 
     def draw_landmarks(self, image, hand_landmarks: List[List[landmark_module.NormalizedLandmark]]):
-       
+        """
+        Draws hand landmarks on the image
+
+        Parameters:
+        ---
+        image: np.ndarray
+            The image on which to draw the landmarks
+        hand_landmarks: List[List[landmark_module.NormalizedLandmark]]
+            The list of hand landmarks to draw
+
+        Returns:
+        ---
+        np.ndarray
+            The image with landmarks drawn on it
+        """
         # List with as many elements as detected hands
         if hand_landmarks:
             # One list per hand

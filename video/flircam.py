@@ -42,8 +42,7 @@ class Flircam(VideoInput):
         logger.debug('Initializing camera')
         self.cam.Init()
         logger.debug('Camera initialized')
-        # self.color_processor = self._init_color_processor(config.video.flir.color_processor) # TO BE CREATED
-        self.color_processor = self._init_color_processor(PySpin.SPINNAKER_COLOR_PROCESSING_ALGORITHM_NEAREST_NEIGHBOR) # TO BE CREATED
+        self.color_processor = self._init_color_processor(PySpin.SPINNAKER_COLOR_PROCESSING_ALGORITHM_NEAREST_NEIGHBOR)
         super().__init__()
 
 

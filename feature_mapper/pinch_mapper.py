@@ -24,10 +24,10 @@ class PinchGestureMapper(Mapper):
 
     def process_features(self, raw_landmarker_data: dict) -> dict:
         """
-        Asbtract method implementation.
+        Abstract method implementation.
         If a right hand is detected and is pinching, (i.e index and thumb are close to eachother)
-        the output frequency is mapped with the x (horizontal) position of the barycenter between thumb index landmarks.
-        Volume is mapped to the y (vertical) position of that barycenter.
+        the output frequency is mapped with the x (horizontal) position of the midpoint between thumb index landmarks.
+        Volume is mapped to the y (vertical) position of that midpoint.
 
 
         Parameters

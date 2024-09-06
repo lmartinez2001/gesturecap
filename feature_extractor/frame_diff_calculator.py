@@ -6,7 +6,7 @@ from .feature_extractor import FeatureExtractor
 
 class FrameDiffCalculator(FeatureExtractor):
     """
-    Quantifies the pixel difference from one frame to another, for instance to detect some movement on the video_input.
+    Quantifies the pixel difference from one frame to another, for instance to detect some movement on the video input.
     It computes the mean of the absolute difference between the current frame and the previous one
     In the current context, this feature extractor is mainly intended for timing measurement purposes.
 
@@ -52,25 +52,25 @@ class FrameDiffCalculator(FeatureExtractor):
 
     def _compute_abs_frame_diff(self, previous_frame: np.ndarray, current_frame: np.ndarray):
         """
-        Converts input frames to grayscale and computes per-pixel |previous_frame - current_frame|
+        Converts input frames to grayscale and computes per-pixel absolute difference.
 
 
-        Parameters
+        Parameters:
         ---
-        current_frame: np.ndarray, required
-            Most recent frame
+        current_frame: np.ndarray
+            The most recent frame.
 
-        previous_frame: np.ndarray, required
-            Frame to be compared with current_frame
+        previous_frame: np.ndarray
+            The frame to be compared with the current frame
 
 
-        Returns
+        Returns:
         ---
         frame_diff: np.ndarray
             Image of the absolute difference between current and previous frames
         """
-        current_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
         previous_gray = cv2.cvtColor(previous_frame, cv2.COLOR_BGR2GRAY)
+        current_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
 
         frame_diff = cv2.absdiff(current_gray, previous_gray)
         return frame_diff

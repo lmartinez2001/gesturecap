@@ -27,16 +27,24 @@ class AudioGenerator(ABC, Thread):
         """
         Getter for the _data_to_send attribute
         Sets a mutex to avoid concurrent access
-        """
-        with self._data_lock:
+
+        Returns:
+        ---
+        Any: The audio data to be sent.
+        """         with self._data_lock:
             return self._data_to_send
 
 
     @data_to_send.setter
     def data_to_send(self, value):
         """
-        Setter for the _data_to_senf attribute
-        uses a mutex to avoid concurrent access
+        Setter for the _data_to_send attribute
+        Uses a mutex to avoid concurrent access
+
+        Parameters:
+        ---
+        value: Any
+            The new audio data to be set.
         """
         with self._data_lock:
             self._data_to_send = value

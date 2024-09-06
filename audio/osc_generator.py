@@ -10,10 +10,22 @@ logger = logging.getLogger(__name__)
 class OSCGenerator(AudioGenerator):
     """
     Allows to send audio parameters defined by the Feature Mapper module as Open Sound Control (OSC) signals
-    One need to specify a server on which a receiver program (like puredata or Max MSP) interprets incoming data
+    One needs to specify a server on which a receiver program (like puredata or Max MSP) interprets incoming data
     """
 
     def __init__(self, ip: str = '127.0.0.1', port: int = 11111):
+        """
+        Initializes the OSCGenerator.
+
+
+        Parameters:
+        ---
+        ip: str, default='127.0.0.1'
+            The IP address of the OSC server.
+
+        port: int, default=11111
+            The port number of the OSC server.
+        """
         super().__init__()
         self.client = udp_client.SimpleUDPClient(ip, port)
         logger.info(f'OSC generator initialized at {ip}:{port}')
@@ -36,5 +48,5 @@ class OSCGenerator(AudioGenerator):
 
 
     def cleanup(self):
-        logger.warn(f'Cleanup method not implemented in {__name__}')
+        logger.info(f'Cleanup method not required in {__name__}')
         pass
