@@ -31,7 +31,8 @@ class AudioGenerator(ABC, Thread):
         Returns:
         ---
         Any: The audio data to be sent.
-        """         with self._data_lock:
+        """
+        with self._data_lock:
             return self._data_to_send
 
 

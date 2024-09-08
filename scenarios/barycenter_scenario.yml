@@ -1,0 +1,19 @@
+# Step 6. of the Barycenter Mapper tutorial located in features_mapper/README.md
+scenario: Barycenter demo
+
+video_input:
+  class: Webcam
+  params:
+    cam_index: 0
+
+feature_extractor:
+  class: HandLandmarker
+
+feature_mapper:
+  class: BarycenterMapper
+
+audio_generator:
+  class: OSCGenerator
+  params:
+    ip: "127.0.0.1"
+    port: 11111
