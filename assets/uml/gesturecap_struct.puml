@@ -1,0 +1,163 @@
+@startuml
+
+title GestureCap Structure
+
+skinparam linetype ortho
+
+
+skinparam classAttributeIconSize 0
+
+package "audio" {
+  class AudioGenerator << (A, #FFCC00) abstract >> {
+    - _data_to_send
+    - _data_lock
+    + data_to_send
+    + {abstract} cleanup()
+    + {abstract} output_audio()
+    + run()
+    + stop()
+  }
+
+  class OSCGenerator {
+    - client
+    + output_audio()
+    + cleanup()
+  }
+
+  class SinewaveGenerator {
+    + output_audio()
+    + cleanup()
+    + generate_sinewave()
+  }
+
+  AudioGenerator <|-- OSCGenerator
+  AudioGenerator <|-- SinewaveGenerator
+}
+
+package "display" {
+  class Display {
+    - _frame
+    - components
+    - stop_event
+    - lock
+    - width
+    - height
+    - frame_count
+    - fps
+    - last_fps_update
+    + frame
+    + add_component(component)
+    + run()
+    + stop()
+  }
+}
+
+package "feature_extractor" {
+  class FeatureExtractor << (A, #FFCC00) abstract >> {
+    + {abstract} process(frame)
+  }
+
+  class FrameDiffCalculator {
+    - previous_frame
+    + process(current_frame)
+    - _compute_abs_frame_diff(previous_frame, current_frame)
+  }
+
+  class HandLandmarker {
+    - mp_hands
+    - mp_drawing
+    - hands
+    + process(image)
+    + draw_landmarks(image, hand_landmarks)
+  }
+
+  FeatureExtractor <|-- FrameDiffCalculator
+  FeatureExtractor <|-- HandLandmarker
+}
+
+package "feature_mapper" {
+  class Mapper << (A, #FFCC00) abstract >> {
+    + {abstract} process_features(features)
+  }
+
+  class BarycenterMapper {
+    - audio_params
+    + process_features(raw_landmarker_data)
+    - _compute_barycenter_1D(coordinates)
+  }
+
+  class PinchGestureMapper {
+    - audio_params
+    + process_features(raw_landmarker_data)
+  }
+
+  class PulseMapper {
+    - thresh
+    - cooldown
+    - last_pulse_time
+    + process_features(value)
+  }
+
+  Mapper <|-- BarycenterMapper
+  Mapper <|-- PinchGestureMapper
+  Mapper <|-- PulseMapper
+}
+
+package "utils" {
+  class Scenario {
+    - parameters
+    - video_input
+    - feature_extractor
+    - feature_mapper
+    - audio_generator
+    + _create_module(module_name)
+  }
+}
+
+package "video" {
+  class VideoInput << (A, #FFCC00) abstract >> {
+    - frame
+    - stop_event
+    - frame_available
+    + {abstract} configure()
+    + {abstract} read_frame()
+    + {abstract} cleanup()
+    + run()
+    + stop()
+    + get_frame()
+  }
+
+  class Flircam {
+    - system
+    - cam
+    - color_processor
+    + _find_camera()
+    + _init_color_processor(interpolation)
+    + configure()
+    + read_frame()
+    + cleanup()
+  }
+
+  class Webcam {
+    - cam_index
+    - cap
+    + configure()
+    + read_frame()
+    + cleanup()
+  }
+
+  VideoInput <|-- Flircam
+  VideoInput <|-- Webcam
+}
+
+class "main.py" {
+  + main(scenario_file)
+}
+
+Scenario "1" *-- "1" VideoInput
+Scenario "1" *-- "1" FeatureExtractor
+Scenario "1" *-- "1" Mapper
+Scenario "1" *-- "1" AudioGenerator
+
+
+@enduml

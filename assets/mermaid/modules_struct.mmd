@@ -1,0 +1,5 @@
+graph TD
+    A{Video input} -->|ndarray| B[Feature Extractor]
+    B-->|"List[Features]"| D[Feature Mapper]
+    D-->|"Dict[Audio Parameters]"| E[Audio Generator]
+    E-->|"AudioSignal\n(OSC,bytes,etc.)"| F{Audio output}
