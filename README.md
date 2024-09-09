@@ -18,6 +18,7 @@ GestureCap is a real-time hand gesture recognition system that leverages compute
 <div align="center"><img src="assets/uml/gesturecap_struct.svg" alt="GestureCap structure"></div>
 
 <div id="installation"/>
+
 ## Installation
 
 1. **Clone the repository**
@@ -58,6 +59,7 @@ uv pip install -r requirements.txt
 > If you're planning to use a Flir camera and haven't installed the SDK yet, jump to the [spinnaker SDK installation](#spinnaker) section. 
 
 <div id="installation-step5"/>
+
 5. **Download the MediaPipe hand landmarker model**
 
 You'll need to download the `hand_landmarker.task` file and place it in the root directory of the project.
@@ -103,13 +105,13 @@ The general structure of the pipeline is as follows:
 4. **Audio Generator**: This modules handles the final conversion from the predetermined audio parameters (stored in a dictionary for instance) to actual chunk of data that can be interpreted by either the audio drivers of the device running the program, or any third party software able to interpret signals output by the generator.
 
 > [!NOTE ]
-> Although a variety of signals could be handled (e.g MIDI,bytes), this project mainly focuses on Open Sound Control (OSC) signals for their flexibility and the common use in the electronic music field.
-> What's more, Pure Data is the only third party software to be tested. But as it's only in charge of receiving OSC signals a outputting sound, any similar software (e.g Max/MSP) will work.
+> Although a variety of signals could be handled (e.g MIDI,bytes), this project mainly focuses on Open Sound Control (OSC) signals for their flexibility and the common use in the electronic music field. What's more, Pure Data is the only third party software to be tested. But as it's only in charge of receiving OSC signals a outputting sound, any similar software (e.g Max/MSP) will work.
 
 Every package corresponding to a major module has a `README` file containing a tutorial about how to expand it.
 
 
 <div id="spinnaker" />
+
 ## Installing Spinnaker SDK
 
 
