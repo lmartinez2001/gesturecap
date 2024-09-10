@@ -60,12 +60,13 @@ uv pip install -r requirements.txt
 
 <div id="installation-step5"/>
 
-5. **Download the MediaPipe hand landmarker model**
+5. **Download the useful MediaPipe models**
 
-You'll need to download the `hand_landmarker.task` file and place it in the root directory of the project.
+You'll need to download the `hand_landmarker.task` and `psoe_landmarker_lite.task` files and place them in the root directory of the project.
 
 ``` shell
 wget -q https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
+wget -q https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task
 ```
 
 6. **Set up Pure Data**

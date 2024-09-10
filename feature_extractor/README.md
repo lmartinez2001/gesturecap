@@ -1,122 +1,120 @@
-# Tutorial: Implementing the `body_pose_detector` Script
+# Tutorial: Implementing the `pose_landmarker` script
 
-In this tutorial, we will create a `body_pose_detector` script that calculates the 
+In GestureCap, a feature refers to any data which can be extracted from a single frame or a set of frames. Extrated features are then processed by the Feature Mapper module to link it with audio parameters.  
+Currently the project handles three types of features:
+1. Landmarks as 3D coordinates
+2. Handedness when we're interest on hand landmarks detection
+3. Frame difference as the mean absolute pixel wise difference between two images (this feature is mainly used for timing measurement purposes) 
 
-> [!WARNING]
-> This tutorial doesn't cover comprehensively the PureData part. Some [useful links](#useful-links) can be found at the end of the tutorial
 
-The file defines a default melody to which several filters can be applied. It is configured to wait for 2 OSC signals from the `tempo` and `resonance` routes. 
-1. tempo: value between 0 and 1 allowing to vary the tempo of the melody
-2. resonance: value between 0 and 1 in charge of tuning the effect of a resonance filter
+In this tutorial, we will create a `pose_landmarker` script that detects body landmarks. It's a wrapper around the Mediapipe `PoseLandmarker_Lite` model.  
 
-To match the range of values expected by both features mentioned above within PureData, an affine transformation is applied to the received values in PureData. For instance, the resonance value received is between 0 and 1, hence it's mapped between 1 and 30 because it makes more sense in the PureData framework.
-
-Finally, other filters can be manually tuned to change the envelop of the output sound.
+> [!NOTE]
+> The `pose_landmarker` feature extractor is nothing more but a copy of the the already existing `hand_landmarker` script in the same package. The only difference lies in the `.task` file used by mediapipe under the wood to run the model. However, the implementation of any more complex feature extractor will follow the exact same steps explained bellow.
 
 > [!TIP]
-> It's possible to control any fiter by either connecting the output of an OSC route to the input of the filter to control, or, as illustrated in this tutorial, by creating another route bound to another feature coming from the main program.
+> Medipipe code snippets used here are copied as is from the [Google developer](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/python) website. For more detailed information about these instructions, please refer to Google website.
 
-We'll map the normalized (x,y) position of the barycenter in the following way:
-+ x: Tunes the value of the resonance filter by increasing it's parameter as the barycenter navigates from left to right
-+ y: Controls the tempo. The higher, the faster
+## 1. Create the `pose_landmarker.py` file
 
-The final implementation is already in the repository and fully working.
-
-## 1. Create the `body_pose_detector.py` File
-
-Navigate to the `feature_mapper` directory within your project and create a new Python file named body_pose_detector.py.
+Navigate to the `feature_extractor` directory within your project and create a new Python file named `pose_landmarker.py`.
 
 ``` bash
 cd feature_mapper
-touch body_pose_detector.py
+touch pose_landmarker.py
 ```
 
 
-## 2. Import Necessary Modules
+## 2. Import necessary modules
 
 
-Open `body_pose_detector.py` and import the required modules:
+Open `pose_landmarker.py` and import the required modules:
 
 ``` python
-from .mapper import Mapper
+# Super class
+from .feature_extractor import FeatureExtractor
+
+import cv2
 import numpy as np
+
+# Mediapipe model
+import mediapipe as mp
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 ```
 
-## 3. Define the `BarycenterMapper` Class
+## 3. Define the `PoseLandmarker` class
 
-Create a class named `BarycenterMapper` that inherits from the `Mapper` class.
+Create a class named `PoseLandmarker` that inherits from the `FeatureExtractor` class.
 
 ``` python
-class BarycenterMapper(Mapper):
+class PoseLandmarker(FeatureExtractor):
 
-    def __init__(self):
-        self.audio_params = {
-            'tempo': 0.5,       # Default normalized tempo
-            'resonance': 0.5    # Default normalised resonance level
-        }
+    def __init__(self, device: str = 'cpu'):
+        # Setting up mediapipe model
+        self.mp_pose = mp.solutions.pose
+        self.mp_drawing = mp.solutions.drawing_utils
+        base_options = python.BaseOptions(
+            model_asset_path='pose_landmarker_lite.task',  # You'll need to download this model
+            delegate=python.BaseOptions.Delegate.GPU if device == 'gpu' else python.BaseOptions.Delegate.CPU
+        )
+        options = vision.PoseLandmarkerOptions(
+            base_options=base_options,
+            output_segmentation_masks=False,  # Optional, for segmenting the person from the background
+        )
+        self.pose = vision.PoseLandmarker.create_from_options(options)
+
 ```
     
 
-## 4. Implement the process_features Method
+## 4. Implement the `process` abstract method
 
-Add the process_features method to the BarycenterMapper class. This method will calculate the barycenter of the hand landmarks and map its coordinates to frequency and volume.
+The `process` method is defined in the `FeatureExtractor` super class. It's called at each iteration of the main loop of the program. This method will run the Mediapipe `Pose landmarker` model and return detected landmarks in a dictionary.
 
-> [!NOTE]
-> We add a small helper function to compute the barycenter. 
 
 ``` python
-    def process_features(self, raw_landmarker_data: dict) -> dict:
-
-        hand_landmarks = raw_landmarker_data.get('landmarks') 
-
-        if hand_landmarks:
-            # Only processing the first detected hand 
-            landmarks = hand_landmarks[0] 
-
-            # Calculate the barycenter 
-            barycenter_x = np.mean([lm.x for lm in landmarks])
-            barycenter_y = np.mean([lm.y for lm in landmarks])
-
-
-            self.audio_params['tempo'] = barycenter_y 
-            self.audio_params['resonance'] = barycenter_x
-
-        return self.audio_params
+    def process(self, image):
+        # Convert grabbed BGR image to RGB
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         
-
-    def _compute_barycenter_1D(self, coordinates: list) -> float:
-        return np.mean(coordinates)
+        # Run mediapipe pipeline on the frame
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
+        detection_result = self.pose.detect(mp_image)
+        
+        # Reformat detection results
+        res = {
+            'landmarks': detection_result.pose_landmarks,
+        }
+        
+        return res
 
 ```
 
-## 5. Update `feature_mapper/__init__.py`
+## 5. Update `feature_extractor/__init__.py`
 
-Import and add the BarycenterMapper to the `__all__` list in `feature_mapper/__init__.py`.
+Import and add the `PoseLandmarker` class to the `__all__` list in `feature_extractor/__init__.py`.
 
 ``` python
 # ... other imports
-from .body_pose_detector import BarycenterMapper
+from .pose_landmarker import PoseLandmarker
 
 __all__ = [
     # ... other mappers
-    'BarycenterMapper'
+    'PoseLandmarker'
 ]
 ```
 
-## 6. (Optional) Create a `barycenter_scenario.yml` scenario file
+## 6. (Optional) Use the newly created module in a scenario file (located in `scenarios` directory)
 
-Navigate to the `scenarios` directory and create the `barycenter_scenario.yml` scenario file
+> [!CAUTION]
+> For now, the `PoseLandmarker` script isn't intended to be used with any other module. However, the provided scenario will work as it won't throw any error, but the output `Audio Parameter` might be meaningless. concretely, the barycenter of all the detected landmarks exists but might have some awkward position, according to how the user stands in front of the camera
 
-``` bash
-cd scenarios
-touch barycenter_scenario.yml
-```
-
+Navigate to the `scenarios` directory and open any `.yml` scenario file.
 Fill the file with the following configuration:
 
 ``` yaml
 
-scenario: Barycenter demo
+scenario: Some demo
 
 video_input:
   class: Webcam
@@ -124,10 +122,10 @@ video_input:
     cam_index: 0
 
 feature_extractor:
-  class: HandLandmarker
+  class: PoseLandmarker # Uses the newly created PoseLandmarker module
 
 feature_mapper:
-  class: BarycenterMapper
+  class: BarycenterMapper # Computes the barycenter all the detected landmarks
 
 audio_generator:
   class: OSCGenerator
@@ -137,28 +135,27 @@ audio_generator:
 ```
 
 
-In this configuration the feature_mapper section is filled with `BarycenterMapper`
-
 ## 7. (Optional) Run the program with the new configuration
 
-First make sure that the corresponding PureData diagram is loaded. It can be found under `puredata/barycenter_demo.pd`
+First make sure that the corresponding Pure Data patch. In this tutorial, the `puredata/barycenter_demo.pd` patch created for the tutorial on how to create a feature extractor will work.
 
 1. In PureData go to `File ->  Open` and select the `barycenter_demo.pd` file
-<div align="center"><img src="../images/gesturecap_pd_open_script.png" alt="Opening a script"></div>
-<div align="center"><img src="../images/gesturecap_pd_diagram_structure.png" alt="Diagram structure"></div>
+<div align="center"><img src="../assets/images/gesturecap_pd_open_script.png" alt="Opening a script"></div>
+<div align="center"><img src="../assets/images/gesturecap_pd_diagram_structure.png" alt="Diagram structure"></div>
 
 2. Locate the *Play/Pause the melody* check box and tick it. You should hear a melody
-<div align="center"><img src="../images/gesturecap_pd_play_melody_box.png" alt="Play/Pause box"></div>
+<div align="center"><img src="../assets/images/gesturecap_pd_play_melody_box.png" alt="Play/Pause box"></div>
 
 3. Start the main program:
 
 ``` bash
-python main.py --scenario scenarios/barycenter_scenario.yml
+python main.py --scenario scenarios/<your_scenario_file>.yml
 ```
 
-A display should appear and moving your hand in front of the camera will change the output audio.
+A display should appear and moving in front of the camera will change the output audio.
 
 ## Useful links
 <a id="useful-links"></a>
 
-- [Blog page from which the PureData script is widely inspired](https://reallyusefulplugins.tumblr.com/richsynthesis)
+- [Blog page from which the PureData scripof t is widely inspired](https://reallyusefulplugins.tumblr.com/richsynthesis)
+- [Google tutorial to setup the PoseLandmarker model](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/python)

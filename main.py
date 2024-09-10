@@ -41,10 +41,10 @@ def main(scenario_file: str):
             features = scenario.feature_extractor.process(frame)
 
             # mapping between features and audio data
-            audio_params = scenario.feature_mapper.process_features(features)
+            # audio_params = scenario.feature_mapper.process_features(features)
 
             # sending audio params
-            scenario.audio_generator.data_to_send = audio_params
+            # scenario.audio_generator.data_to_send = audio_params
 
             # frame to display
             display.frame = frame

@@ -24,15 +24,17 @@ class BarycenterMapper(Mapper):
         logger.debug(f'Initiazed {__name__} with audio_params: {self.audio_params}')
 
 
-    # 4. Implementation of the process_feature abstract method
+    # 4. Implementation of the process_feature abstract method defined in Mapper
     def process_features(self, raw_landmarker_data: dict) -> dict:
         """
         Calculates the barycenter of hand landmarks and maps it to audio parameters
+
 
         Parameters:
         ---
         raw_landmarker_data: dict
             Contains landmarks and handedness of every detected hand
+
 
         Returns:
         ---
