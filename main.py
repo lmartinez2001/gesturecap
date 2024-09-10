@@ -3,9 +3,6 @@ import numpy as np
 import cv2
 import yaml
 
-# Video module
-from video import Webcam
-
 # Display
 from display import Display
 from utils.display_components import create_fps_counter

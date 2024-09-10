@@ -1,13 +1,13 @@
-import cv2
-import PySpin
 import time
-import logging
-
+import cv2
 import numpy as np
 
+import PySpin
 from .video_input import VideoInput
 
+import logging
 logger = logging.getLogger(__name__)
+
 
 class Flircam(VideoInput):
     """
