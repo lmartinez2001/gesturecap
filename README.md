@@ -143,3 +143,8 @@ uv pip install ./dependencies/spinnaker_python-4.0.0.116-cp310-cp310-linux_x86_6
 ```
 
 From here you can go jump back to [step 5](#installaton-step5) of the installation section.
+
+## Additional information
+
+
+**To use this reposiroty, cite Martinez, Goel, Puranik, Berreby and Krishna**
