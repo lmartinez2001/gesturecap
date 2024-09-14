@@ -25,7 +25,7 @@ GestureCap is a real-time hand gesture recognition system that leverages compute
 
 ``` bash
 git clone git@github.com:lmartinez2001/gsoc.git
-cd GestureCap
+cd gesturecap
 ```
 
 

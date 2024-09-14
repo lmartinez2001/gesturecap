@@ -25,7 +25,6 @@ flatbuffers==24.3.25
 fonttools==4.53.1
 fqdn==1.5.1
 future==1.0.0
--e file:///home/louis/dev/python/gesturecap
 h11==0.14.0
 httpcore==1.0.5
 httpx==0.27.0
@@ -125,3 +124,4 @@ wcwidth==0.2.13
 webcolors==24.8.0
 webencodings==0.5.1
 websocket-client==1.8.0
+./dependencies/spinnaker_python-4.0.0.116-cp310-cp310-linux_x86_64.whl
