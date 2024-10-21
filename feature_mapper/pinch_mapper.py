@@ -55,8 +55,9 @@ class PinchGestureMapper(Mapper):
                     distance = math.dist([index_pos.x, index_pos.y], [thumb_pos.x, thumb_pos.y])
                     middle = np.mean([index_pos.x, thumb_pos.x]), np.mean([index_pos.y, thumb_pos.y])
                     if distance < 0.1:
-                        freq = 100000/((middle[0]**2) * 1000 + 100)
-                        volume = middle[1]
+                        freq = 200 * 50 ** (1-middle[0])
+                        #freq = 100000/((middle[0]**2) * 1000 + 100)
+                        volume = 1-middle[1]
 
                         self.audio_params['frequency'] = freq
                         self.audio_params['volume'] = volume
