@@ -1,0 +1,16 @@
+scenario: main
+
+video_input:
+  class: Flircam
+
+feature_extractor:
+  class: HandLandmarker
+
+feature_mapper:
+  class: PinchGestureMapper
+
+audio_generator:
+  class: OSCGenerator
+  params:
+    ip: "127.0.0.1"
+    port: 11111
