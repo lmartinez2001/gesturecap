@@ -33,15 +33,19 @@ def main(scenario_file: str):
         while scenario.video_input.is_alive():
             # Frame acquisition
             frame: np.ndarray = scenario.video_input.get_frame()
+            # frame = cv2.flip(frame, 1)
 
             # feature extractor output
             features = scenario.feature_extractor.process(frame)
 
+            # draw landmarks
+            scenario.feature_extractor.draw_landmarks(frame, features['landmarks'])
+
             # mapping between features and audio data
-            # audio_params = scenario.feature_mapper.process_features(features)
+            audio_params = scenario.feature_mapper.process_features(features)
 
             # sending audio params
-            # scenario.audio_generator.data_to_send = audio_params
+            scenario.audio_generator.data_to_send = audio_params
 
             # frame to display
             display.frame = frame
